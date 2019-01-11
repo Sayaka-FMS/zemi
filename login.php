@@ -1,4 +1,5 @@
 <?php
+session_start();
 $dsn = 'mysql:host=localhost;dbname=test;charset=utf8mb4';
 $db_username = 'root';
 $db_password = '';
@@ -14,7 +15,7 @@ if ( empty( $_POST[ "username" ] ) ) {
 	$pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 	try {
 		$username = $_POST["username"];
-		$stmt = $pdo->prepare( "SELECT * FROM user_info where user_name = ?" );
+		$stmt = $pdo->prepare( "SELECT * FROM user_info_2 where username = ?" );
 		$stmt->execute( array($username) );
 		$user_sanshou = $stmt->fetch();
 		if(!$user_sanshou){
@@ -24,6 +25,7 @@ if ( empty( $_POST[ "username" ] ) ) {
       if($user_sanshou['password']!=$_POST['password']){
 				echo "パスワードが間違っています";
 			}else{
+				$_SESSION['username'] = $_POST['username'];
 				header("Location:trip_chat.php");
 			}
 		}
@@ -45,7 +47,7 @@ if ( empty( $_POST[ "username" ] ) ) {
 	<input name="username" type="text" size="20">
 	</br>
 	<b>パスワード</b>
-	<input name="password" type="text" size="20">
+	<input name="password" type="password" size="20">
 	</br>
 	<input type="submit" name="login" value="ログイン">
 </form>
