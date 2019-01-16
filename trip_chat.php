@@ -53,10 +53,10 @@ if ( isset( $_POST[ 'message' ] ) ) {
 			<?php
 			echo $name.'さん';
 			?>
+			<a href="logout.php">ログアウト</a>
 		</div>
 		</div>
 		</div>
-		<a href="logout.php">ログアウト</a>
 		<div id="bms_messages">
 		<div id="bms_message">
 	<?php
