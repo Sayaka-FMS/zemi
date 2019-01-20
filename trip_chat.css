@@ -16,13 +16,14 @@
 
 /* ヘッダー部分② */
 #bms_chat_header {
-  position:fixed;
+  position: absolute;
   padding: 6px;/*隙間調整*/
   font-size: 16px;
   height: 34px;
   width: 100%;
   background: #ddd;
   border: 1px solid #ccc;
+  z-index: 3;
 }
 /* ステータスマークとユーザー名 */
 #bms_chat_user_status {
@@ -42,15 +43,18 @@
 
 /* タイムライン部分③ */
 #bms_messages {
-  overflow: auto;/* スクロールを効かせつつ、メッセージがタイムラインの外に出ないようにする */
-  overflow-y:scroll;
-  width :100%;
-  height:100%;/*テキストエリアが下に張り付く様にする*/
+  overflow-y: scroll;/* スクロールを効かせつつ、メッセージがタイムラインの外に出ないようにする */
+  overflow-x: hidden;
+  position:absolute;
+  width : 100%;
+  top: 12%;
+  height: 75%;/*テキストエリアが下に張り付く様にする*/
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
   background-color: #eee;
   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2) inset;/*ヘッダーの下に影を入れる*/
   text-align: right;
+  z-index: 1;
 }
 #bms_messege{
   float: right;
@@ -86,26 +90,22 @@
 
   /* テキストエリア、送信ボタン④ */
   #bms_send {
-    /* position:fixed; */
-    background-color:#eee;/*タイムラインの色と同じにする*/
+    position: absolute;
+    bottom:0px;
+    background: #ddd;/*タイムラインの色と同じにする*/
     border-right: 1px solid #ddd;
     border-left: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
     height: 48px;
     width: 100%;
     padding: 4px;
+    z-index: 2;
   }
   #bms_send_message{
-    width: calc(100% - 100px);/*常に送信ボタンの横幅を引いたサイズに動的に計算*/
-    line-height: 16px;
-    height: 100%;
-    padding: 14px 6px 0px 6px;/*文字がテキストエリアの中心になる様に隙間調整*/
-    border: 1px solid #ccc;
-    border-radius: 4px;/*角丸*/
-    text-align: left;/*文字を左寄せ*/
-    box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.2) inset;/*内側に影を入れてテキストエリアらしくした*/
-    box-sizing: border-box;/*paddingとborderの要素の高さと幅の影響をなくす（要素に高さと幅を含める）*/
-
+    position: absolute;
+    top:5px;
+    width: calc(100% - 100px);　
+    z-index: 2;　
   }
   #bms_send_btn {
     width: 72px;
@@ -120,6 +120,7 @@
     border: 1px solid #bbb;
     border-radius: 4px;/*角丸*/
     box-sizing: border-box;/*paddingとborderの要素の高さと幅の影響をなくす（要素に高さと幅を含める）*/
+    z-index: 2;
   }
   #bms_send_btn:hover {
     background: #13178E; /*マウスポインタを当てた時にアクティブな色になる*/
