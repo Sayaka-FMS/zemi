@@ -105,6 +105,9 @@
     position: absolute;
     top:5px;
     width: calc(100% - 100px);　
+    line-height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;/*角丸*/
     z-index: 2;　
   }
   #bms_send_btn {

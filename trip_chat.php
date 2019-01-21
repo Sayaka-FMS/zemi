@@ -10,7 +10,6 @@ if ( isset( $_SESSION[ 'username' ] ) ) {
 $dsn = 'mysql:host=localhost;dbname=test;charset=utf8mb4';
 $username = 'root';
 $password = '';
-$id = 1;
 date_default_timezone_set( 'Asia/Tokyo' );
 $time = date( "Y-m-d H:i:s" );
 $pdo = new PDO( $dsn, $username, $password );
@@ -54,6 +53,7 @@ if ( isset( $_POST[ 'message' ] ) ) {
 			echo $name.'さん';
 			?>
 			<a href="logout.php">ログアウト</a>
+			<a href="choice.php">グループ切り替え</a>
 		</div>
 		</div>
 		</div>
@@ -77,11 +77,11 @@ if ( isset( $_POST[ 'message' ] ) ) {
 </div>
 </div>
 </div>
+<div id="bms_send">
 	<form method="post" action="trip_chat.php">
-		<div id="bms_send">
-		<div id="bms_send_message"><input name="message" type="text"></div>
-		<button name="submit" type="submit"><div id="bms_send_btn">送信</div></button>
-	</div>
+		<textarea  id="bms_send_message" name="message"></textarea>
+		<button name="submit" id="bms_send_btn" type="submit">送信</button>
 	</form>
+</div>
 </body>
 </html>
