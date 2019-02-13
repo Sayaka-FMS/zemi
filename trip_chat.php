@@ -3,6 +3,8 @@
 session_start();
 if ( isset( $_SESSION[ 'username' ] ) ) {
 	$name = $_SESSION[ 'username' ];
+	$userID = $_SESSION['userID'];
+	$url_token = $_SESSION['urltoken'];
 } else {
 	header("Location:login.php");
 }
@@ -22,8 +24,8 @@ if ( isset( $_POST[ 'message' ] ) ) {
 	$message = $_POST[ 'message' ];
 	//chatデータ入れる
 	try {
-		$stmt = $pdo->prepare( "INSERT INTO trip_chat VALUES (?, ?, ?, ?)" );
-		$stmt->execute( array( $id, $name, $message, $time ) );
+		$stmt = $pdo->prepare( "INSERT INTO trip_chat(userID,name,message,url_token) VALUES (?, ?, ?,?)" );
+		$stmt->execute( array( $userID, $name, $message, $url_token ) );
 		header('Location:trip_chat.php',true,303);
 	} catch ( Exception $e ) {
 		echo $e->getMessage() . PHP_EOL;
@@ -62,7 +64,7 @@ if ( isset( $_POST[ 'message' ] ) ) {
 	<?php
 	//chatデータ表示
 	try {
-		$stmt = $pdo->query( "SELECT * FROM trip_chat" );
+		$stmt = $pdo->query( "SELECT * FROM trip_chat WHERE url_token = '$url_token'" );
 		foreach ( $stmt as $value ) {
 			if($value['name']==$_SESSION['username']){
 				echo  "<div id='bms_messege_p_right'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";

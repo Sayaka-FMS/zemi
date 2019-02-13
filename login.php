@@ -34,7 +34,6 @@ if ( empty( $_POST["username"] ) ) {
 					try {
 					$stmt2 = $pdo->prepare( "INSERT INTO user_group_info (id,url_token,user_id,date) VALUES (NULL,?,?,?)" );
 					$stmt2->execute( array($_SESSION['urltoken'],$user_sanshou['userID'],$time) );
-					unset($_SESSION['urltoken']);
 					} catch ( Exception $e ) {
 						echo $e->getMessage() . PHP_EOL;
 					}
