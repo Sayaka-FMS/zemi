@@ -1,0 +1,67 @@
+@charset "UTF-8";
+body{
+    font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    font-size: 18px;
+    line-height: 40px;
+    color: #10108f;
+    background-color: #EEFFFF;
+    text-align: left;
+    }
+
+    .button {
+        border-style: none;
+        -moz-border-radius: 10px;
+		-webkit-border-radius: 10px;
+		border-radius: 10px;
+        background-color: rgb(90, 95, 245);
+        color: #fff;
+        text-align: center;
+      }
+      .button:hover {
+        background-color: #59b1eb;
+        text-align: center;	
+      }
+
+      .button2 {
+        border-style: none;
+        -moz-border-radius: 10px;
+		-webkit-border-radius: 10px;
+		border-radius: 10px;
+        background-color: rgb(247, 136, 9);
+        color: #fff;
+        text-align: center;
+      }
+      .button2:hover {
+        background-color: #ffe9a1;
+        text-align: center;	
+      }
+
+      .button3 {
+        border-style: none;
+        -moz-border-radius: 10px;
+		-webkit-border-radius: 10px;
+		border-radius: 10px;
+        background-color: rgb(247, 9, 195);
+        color: #fff;
+        text-align: center;
+      }
+      .button3:hover {
+        background-color: #ffa1f7;
+        text-align: center;	
+      }
+
+      .button4 {
+        border-style: none;
+        -moz-border-radius: 10px;
+		-webkit-border-radius: 10px;
+		border-radius: 10px;
+        background-color: rgb(2, 54, 18);
+        color: #fff;
+        text-align: center;
+      }
+      .button4:hover {
+        background-color: #449e4b;
+        text-align: center;	
+      }
+      
+        
