@@ -139,11 +139,9 @@ function send() {
     </div>
   </div>
   <div id="bms_send">
-    <form method="post" action="trip_chat.php">
       <textarea  id="bms_send_message" name="message"></textarea>
-      <button name="submit" id="bms_send_btn" type="submit">送信</button>
+      <button name="submit" id="bms_send_btn" onclick="send()">送信</button>
       <button name="submit" id="favo_btn" type="submit">♡</button>
-    </form>
   </div>
 </body>
 </html>
