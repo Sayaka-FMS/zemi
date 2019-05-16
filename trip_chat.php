@@ -63,15 +63,19 @@ conn.onmessage = function(e) {
   var receive_data = {}
   receive_data = JSON.parse(e.data)
   append_message = receive_data["name"] +":" + receive_data["message"];
-  $("#message_box").append(append_message);
+  var inner = $('<div id="bms_messege_p_left"></div>').text(append_message);
+  var box = $('<div id="box"></div>').html(inner);
+  $('#chat').append(box);
 };
-//メッセージを送る
 //メッセージを送る
 function send() {
   var param = {}
   param["name"] = '<?php echo $name;?>';
   param["userID"] = '<?php echo $userID;?>';
   param["message"] = $('#bms_send_message').val();
+  var inner_2 = $('<div id="bms_messege_p_right"></div>').text(JSON.stringify(param));
+  $('#chat').append('<div id="bms_messege_p_right">'+param["name"]+" "+param['message']+'</div>');
+  console.log(inner_2);
   conn.send(JSON.stringify(param));
   //チャット欄にメッセージ追加
   //Ajax通信メソッド
@@ -82,23 +86,25 @@ function send() {
     type: "POST",
     url: "trip_data.php",
     data: {
+      name:param["name"],
+      userID:param["userID"],
       message:$('#bms_send_message').val()
     },
     //Ajax通信が成功した場合に呼び出されるメソッド
     success: function(data, dataType){
-      //デバッグ用 アラートとコンソール
-      alert(param);
-      console.log(param);
-
-      //出力する部分
-      $('#result').html(data);
-    },
-    error: function(XMLHttpRequest, textStatus, errorThrown){
-      alert('Error : ' + errorThrown);
-      $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
-      $("#textStatus").html("textStatus : " + textStatus);
-      $("#errorThrown").html("errorThrown : " + errorThrown);
-    }
+    //   //デバッグ用 アラートとコンソール
+    //   alert(param);
+       console.log(param);
+    //
+    //   //出力する部分
+    //   $('#result').html(data);
+     },
+     error: function(XMLHttpRequest, textStatus, errorThrown){
+       alert('Error : ' + errorThrown);
+       $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+       $("#textStatus").html("textStatus : " + textStatus);
+       $("#errorThrown").html("errorThrown : " + errorThrown);
+     }
   });
 
 };
@@ -135,6 +141,7 @@ function send() {
           echo $e->getMessage() . PHP_EOL;
         }
         ?>
+        <div id="chat"></div>
       </div>
     </div>
   </div>

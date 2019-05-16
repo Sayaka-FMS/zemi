@@ -20,7 +20,7 @@
   padding: 6px;/*隙間調整*/
   font-size: 16px;
   height: 34px;
-  width: 100%;
+  width: 98.5%;
   background: #ddd;
   border: 1px solid #ccc;
   z-index: 3;
@@ -47,12 +47,11 @@
   overflow-x: hidden;
   position:absolute;
   width : 100%;
-  top: 12%;
-  height: 75%;/*テキストエリアが下に張り付く様にする*/
+  top: 9%;
+  height: 80%;/*テキストエリアが下に張り付く様にする*/
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
   background-color: #eee;
-  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2) inset;/*ヘッダーの下に影を入れる*/
   text-align: right;
   z-index: 1;
 }
@@ -98,24 +97,39 @@
     border-bottom: 1px solid #ddd;
     height: 48px;
     width: 100%;
-    padding: 4px;
+    padding-bottom: 10px;
     z-index: 2;
   }
   #bms_send_message{
     position: absolute;
     top:5px;
-    width: calc(100% - 100px);　
+    /* width: calc(100% - 100px);　 */
+    width: 80%;
     line-height: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;/*角丸*/
     z-index: 2;　
   }
-  #bms_send_btn {
-    width: 72px;
-    height: 48px;
+  #favo_btn{
+    display: block;
+    margin-left: 85%;
+    width: 10%;
     font-size: 16px;
+    color: #fff;
+    font-weight: bold;
+    background: #bcbcbc;
+    text-align: center;/*文字をボタン中央に表示*/
+    border: 1px solid #bbb;
+    border-radius: 4px;/*角丸*/
+    box-sizing: border-box;/*paddingとborderの要素の高さと幅の影響をなくす（要素に高さと幅を含める）*/
+  }
+  #bms_send_btn {
+    display: block;
+    margin-left: 85%;
+    margin-bottom: 3px;
+    width: 10%;
+    font-size: 8px;
     line-height: 3em;
-    float: right;/*bms_sendに対して右寄せ*/
     color: #fff;
     font-weight: bold;
     background: #bcbcbc;
@@ -128,4 +142,11 @@
   #bms_send_btn:hover {
     background: #13178E; /*マウスポインタを当てた時にアクティブな色になる*/
     cursor: pointer;/*マウスポインタを当てた時に、カーソルが指の形になる*/
+  }
+  #favo_btn:hover {
+    background: #ff0000; /*マウスポインタを当てた時にアクティブな色になる*/
+    cursor: pointer;/*マウスポインタを当てた時に、カーソルが指の形になる*/
+  }
+  #box{
+    overflow: hidden;
   }
