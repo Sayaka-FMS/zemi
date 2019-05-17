@@ -47,8 +47,8 @@
   overflow-x: hidden;
   position:absolute;
   width : 100%;
-  top: 9%;
-  height: 80%;/*テキストエリアが下に張り付く様にする*/
+  top: 7.5%;
+  height: 83%;/*テキストエリアが下に張り付く様にする*/
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
   background-color: #eee;

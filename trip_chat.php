@@ -1,5 +1,3 @@
-
-
 <?php
 // 送信された名前とメッセージの表示
 session_start();
@@ -8,9 +6,7 @@ if(isset($_POST['group_ID'])){
   $group_ID = $_POST['group_ID'];
   $_SESSION['group_name']=$_POST['group_name'];
   $_SESSION['group_ID']=$_POST['group_ID'];
-
 }
-
 if ( isset( $_SESSION[ 'username' ] ) ) {
   $name = $_SESSION[ 'username' ];
   $userID = $_SESSION['userID'];
@@ -19,7 +15,6 @@ if ( isset( $_SESSION[ 'username' ] ) ) {
 } else {
   header("Location:login.php");
 }
-
 $dsn = 'mysql:host=localhost;dbname=test;charset=utf8mb4';
 $username = 'root';
 $password = '';
@@ -49,6 +44,7 @@ var multi_login_count = 0;
 //接続できた
 conn.onopen = function(e) {
   console.log(e);
+  $("#bms_messages").animate({scrollTop:10000});
 };
 conn.onerror = function(e) {
   alert("エラー");
@@ -66,6 +62,7 @@ conn.onmessage = function(e) {
   var inner = $('<div id="bms_messege_p_left"></div>').text(append_message);
   var box = $('<div id="box"></div>').html(inner);
   $('#chat').append(box);
+  $("#bms_messages").animate({scrollTop:10000});
 };
 //メッセージを送る
 function send() {
@@ -77,6 +74,9 @@ function send() {
   $('#chat').append('<div id="bms_messege_p_right">'+param["name"]+" "+param['message']+'</div>');
   console.log(inner_2);
   conn.send(JSON.stringify(param));
+  $("#bms_messages").animate({scrollTop:10000});
+  var reset_target = document.getElementById("bms_send_message");
+  reset_target.value = '';
   //チャット欄にメッセージ追加
   //Ajax通信メソッド
   //type : HTTP通信の種類(POSTとかGETとか)
@@ -106,7 +106,6 @@ function send() {
        $("#errorThrown").html("errorThrown : " + errorThrown);
      }
   });
-
 };
 </script>
 
