@@ -5,6 +5,7 @@
   margin: auto;
   height: 100%;/*ここはご自由に*/
   width: 100%;/*ここはご自由に*/
+  overflow-x: hidden;
 }
 /* チャットの外側部分① */
 #bms_messages_container{
@@ -20,7 +21,7 @@
   padding: 6px;/*隙間調整*/
   font-size: 16px;
   height: 34px;
-  width: 98.5%;
+  width: 100%;
   background: #ddd;
   border: 1px solid #ccc;
   z-index: 3;
@@ -48,7 +49,7 @@
   position:absolute;
   width : 100%;
   top: 7.5%;
-  height: 83%;/*テキストエリアが下に張り付く様にする*/
+  height: 84%;/*テキストエリアが下に張り付く様にする*/
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
   background-color: #eee;
