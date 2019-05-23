@@ -59,24 +59,34 @@ conn.onmessage = function(e) {
   var receive_data = {}
   receive_data = JSON.parse(e.data)
   append_message = receive_data["name"] +":" + receive_data["message"];
-  var inner = $('<div id="bms_messege_p_left"></div>').text(append_message);
+  console.log(receive_data["favo"]);
+  if(receive_data["favo"]==1){
+    var inner = $('<div id="bms_messege_p_left_favo"></div>').text(append_message);
+  }else{
+    var inner = $('<div id="bms_messege_p_left"></div>').text(append_message);
+  }
   var box = $('<div id="box"></div>').html(inner);
   $('#chat').append(box);
   $("#bms_messages").animate({scrollTop:10000});
 };
 //メッセージを送る
-function send() {
+function send(favo) {
   var param = {}
   param["name"] = '<?php echo $name;?>';
   param["userID"] = '<?php echo $userID;?>';
   param["message"] = $('#bms_send_message').val();
-  var inner_2 = $('<div id="bms_messege_p_right"></div>').text(JSON.stringify(param));
-  $('#chat').append('<div id="bms_messege_p_right">'+param["name"]+" "+param['message']+'</div>');
-  console.log(inner_2);
+  param["favo"] = favo;
+//  var reset_favo = document.getElementById("favo_btn");
+  //reset_favo.value = "0";
+  if(param["favo"]==1){
+    $('#chat').append('<div id="bms_messege_p_right_favo">'+param["name"]+" "+param['message']+'</div>');
+  }else{
+    $('#chat').append('<div id="bms_messege_p_right">'+param["name"]+" "+param['message']+'</div>');
+  }
   conn.send(JSON.stringify(param));
+  console.log(JSON.stringify(param));
   $("#bms_messages").animate({scrollTop:10000});
-  var reset_target = document.getElementById("bms_send_message");
-  reset_target.value = '';
+  //console.log($('#favo_btn').val());
   //チャット欄にメッセージ追加
   //Ajax通信メソッド
   //type : HTTP通信の種類(POSTとかGETとか)
@@ -88,25 +98,35 @@ function send() {
     data: {
       name:param["name"],
       userID:param["userID"],
-      message:$('#bms_send_message').val()
+      message:$('#bms_send_message').val(),
+      favo:param["favo"]
     },
     //Ajax通信が成功した場合に呼び出されるメソッド
     success: function(data, dataType){
-    //   //デバッグ用 アラートとコンソール
-    //   alert(param);
-       console.log(param);
-    //
-    //   //出力する部分
-    //   $('#result').html(data);
-     },
-     error: function(XMLHttpRequest, textStatus, errorThrown){
-       alert('Error : ' + errorThrown);
-       $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
-       $("#textStatus").html("textStatus : " + textStatus);
-       $("#errorThrown").html("errorThrown : " + errorThrown);
-     }
+      //   //デバッグ用 アラートとコンソール
+      //   alert(param);
+      console.log(param);
+      //
+      //   //出力する部分
+      //   $('#result').html(data);
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown){
+      alert('Error : ' + errorThrown);
+      $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+      $("#textStatus").html("textStatus : " + textStatus);
+      $("#errorThrown").html("errorThrown : " + errorThrown);
+    }
   });
+  var reset_target = document.getElementById("bms_send_message");
+  reset_target.value = '';
 };
+function send_nfavo() {
+  send(0);
+};
+function send_favo() {
+  send(1);
+};
+
 </script>
 
 <body id="your_container">
@@ -131,23 +151,30 @@ function send() {
           $stmt = $pdo->query( "SELECT * FROM trip_chat WHERE group_id = '$group_ID'" );
           foreach ( $stmt as $value ) {
             if($value['name']==$_SESSION['username']){
-              echo  "<div id='bms_messege_p_right'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
+              if($value['favo']==1){
+                echo  "<div id='bms_messege_p_right_favo'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
+              }else{
+                echo  "<div id='bms_messege_p_right'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
+              }
+            }else
+            if($value['favo']==1){
+              echo  "<div id='bms_messege_p_left_favo'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
             }else{
               echo  "<div id='bms_messege_p_left'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
             }
-          };
-        } catch ( Exception $e ) {
-          echo $e->getMessage() . PHP_EOL;
-        }
-        ?>
-        <div id="chat"></div>
-      </div>
+          }
+      } catch ( Exception $e ) {
+        echo $e->getMessage() . PHP_EOL;
+      }
+      ?>
+      <div id="chat"></div>
     </div>
   </div>
-  <div id="bms_send">
-      <textarea  id="bms_send_message" name="message"></textarea>
-      <button name="submit" id="bms_send_btn" onclick="send()">送信</button>
-      <button name="submit" id="favo_btn" type="submit">♡</button>
-  </div>
+</div>
+<div id="bms_send">
+  <textarea  id="bms_send_message" name="message"></textarea>
+  <button name="submit" id="bms_send_btn" onclick="send_nfavo()">送信</button>
+  <button name="favo" id="favo_btn" onclick="send_favo()">♡</button>
+</div>
 </body>
 </html>
