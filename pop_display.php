@@ -24,12 +24,12 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 <head>
   <meta charset="utf-8">
   <link type="text/css" rel="stylesheet" href="pop_display.css">
+  <link type="text/css" rel="stylesheet" href="trip_chat.css">
   <title>旅行チャット</title>
 </head>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
 <script src="http://code.jquery.com/jquery-3.4.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
-<script type="text/javascript" src="js/jquery.random.js"></script>
 <script>
 var conn = new WebSocket('ws://localhost:8080');
 var multi_login_count = 0;
@@ -37,23 +37,33 @@ $(function(){
   conn.onmessage = function(e) {
     var receive_data = {}
     receive_data = JSON.parse(e.data);
-    console.log(receive_data);
+    console.log(receive_data["mes"]);
+    $("#"+receive_data["mes"]).css({'top':receive_data["top"],'left':receive_data["left"]});
   };
   $('.selectable .pop_things').draggable({
     start: function(e,ui){
     },
     drag:function(e,ui){
-    },
-    stop: function(e, ui) {
       var param ={};
-      param["top"] = ui.offset.top;
-      param["left"] = ui.offset.left;
+      param["top"] = ui.position.top;
+      param["left"] = ui.position.left;
       var id = $(this).attr('id');
       //console.log(this);
       param["mes"] = id;
-      console.log(ui);
+      console.log(id);
       conn.send(JSON.stringify(param));
-      console.log(' top: ' + ui.offset.top + ' left: ' + ui.offset.left);
+      console.log(' top: ' + ui.position.top + ' left: ' + ui.position.left);
+    },
+    stop: function(e, ui) {
+      var param ={};
+      param["top"] = ui.position.top;
+      param["left"] = ui.position.left;
+      var id = $(this).attr('id');
+      //console.log(this);
+      param["mes"] = id;
+      console.log(id);
+      conn.send(JSON.stringify(param));
+      console.log(' top: ' + ui.position.top + ' left: ' + ui.position.left);
     }
   });
   $('.selectable').selectable({
@@ -86,6 +96,19 @@ try {
 }
 ?>
 </script>
+<div id="bms_chat_header">
+  <div id="bms_chat_user_status">
+    <div id="bms_status_icon">●</div>
+    <div id ="bms_chat_user_name">
+      <?php
+      echo $name.'さん';
+      ?>
+      <a href="logout.php">ログアウト</a>
+      <a href="choice.php">グループ切り替え</a>
+      <a href="trip_chat.php">チャットシステムへ</a>
+    </div>
+  </div>
+</div>
 <body>
   <div class="selectable">
     <?php
