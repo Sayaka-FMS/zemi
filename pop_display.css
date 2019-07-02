@@ -1,0 +1,14 @@
+.pop_things {
+  width :100px;
+  display: inline-block;
+  padding: 1% 0.1%;
+  margin: 2em 1em;
+  color: #232323;
+  background: #fff8e8;
+  border-left: solid 10px #ffc06e;
+  text-align: center;/*文字をボタン中央に表示*/
+}
+
+/* #things {
+  display: inline-block;
+} */
