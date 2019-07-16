@@ -23,9 +23,22 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 
 if ( isset( $_POST['id'] ) ) {
   try {
-    $stmt = $pdo->prepare( "INSERT INTO group_pop_display_info(group_id,pop_id,pop_top,pop_left) VALUES (?, ?, ?, ?)" );
-    $stmt->execute( array( $group_ID,$id,$top,$left) );
-    //header('Location:trip_chat.php',true,303);
+    $stmt_1 = $pdo->query( "SELECT count(*) FROM group_pop_display_info WHERE pop_id = '$id'" );
+    $pop_thing_count = $stmt_1->fetchColumn();
+    if($pop_thing_count==0){
+      $stmt = $pdo->prepare( "INSERT INTO group_pop_display_info(user_id,group_id,pop_id,pop_top,pop_left) VALUES (?, ?, ?, ?, ?)" );
+      $stmt->execute( array( $userID,$group_ID,$id,$top,$left) );
+    }else{
+      $stmt_1 = $pdo->query( "SELECT * FROM group_pop_display_info WHERE pop_id = '$id'" );
+      foreach ( $stmt_1 as $value ) {
+        if($value['pop_top']==$top&&$value['pop_left']==$left){
+        }else{
+          $stmt = $pdo->query("DELETE FROM group_pop_display_info WHERE pop_id = '$id'");
+          $stmt = $pdo->prepare( "INSERT INTO group_pop_display_info(user_id,group_id,pop_id,pop_top,pop_left) VALUES (?, ?, ?, ?, ?)" );
+          $stmt->execute( array( $userID,$group_ID,$id,$top,$left) );
+        }
+      }
+    }//header('Location:trip_chat.php',true,303);
   } catch ( Exception $e ) {
     echo $e->getMessage() . PHP_EOL;
   }

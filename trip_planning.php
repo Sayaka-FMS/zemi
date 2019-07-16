@@ -156,7 +156,7 @@ $(function(){
   receive_pop_data = <?php echo $pop_thing_json;?>;
   receive_pop_data_length = Object.keys(receive_pop_data).length;
   for(var i=0;i < receive_pop_data_length;i++){
-     $("#"+receive_pop_data[i][0]).css({'position':'absolute','top':receive_pop_data[i][1],'left':receive_pop_data[i][2]});
+    $("#"+receive_pop_data[i][0]).css({'position':'absolute','top':receive_pop_data[i][1],'left':receive_pop_data[i][2]});
   }
 });
 </script>
@@ -170,18 +170,24 @@ $(function(){
       <a href="logout.php">ログアウト</a>
       <a href="choice.php">グループ切り替え</a>
       <a href="trip_chat.php">チャットシステムへ</a>
-      <a href="trip_planning.php">旅行プラン検討へ</a>
+      <a href="pop_display.php">みんなで相談画面へ</a>
       <button id="pop_things_save" onclick="save()">保存</button>
     </div>
   </div>
 </div>
 <body>
-  <div class="selectable">
-    <?php
-    for($i=0;$i<$favo_things;$i++){
-      echo '<div class="pop_things" id="pop_thing_'.$favo_number[$i].'">'.$favo[$i].'</div>';
-    }
-    ?>
+  <div class="split">
+    <div class="split-item pop_display">
+      <div class="selectable">
+        <?php
+        for($i=0;$i<$favo_things;$i++){
+          echo '<div class="pop_things" id="pop_thing_'.$favo_number[$i].'">'.$favo[$i].'</div>';
+        }
+        ?>
+      </div>
+    </div>
+    <div class="split-item trip_plan">
+    </div>
   </div>
   <div id="pointer"></div>
 </body>
@@ -190,4 +196,5 @@ $(function(){
 <?php
 //　実験　3-4人の仲良しグループを集める。ディスカッション時間決める。時間を決めないで、どちらが決めやすかったか。
 //　LINE、Googleドキュメント比較。仮定、どうしても会えない人用、集まれない人用。
+//　研究目的を明確化する→それによりプランが決めやすくなる
 ?>
