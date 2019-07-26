@@ -24,7 +24,7 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 <head>
   <meta charset="utf-8">
   <link type="text/css" rel="stylesheet" href="pop_display.css">
-    <link type="text/css" rel="stylesheet" href="trip_chat.css">
+  <link type="text/css" rel="stylesheet" href="trip_chat.css">
   <title>旅行チャット</title>
 </head>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -49,6 +49,15 @@ $(function(){
     if(receive_data["mouseX"]!=null){
       $("#pointer").css({'background-color':"red",'top':receive_data["mouseY"],'left':receive_data["mouseX"]});
       document.getElementById("pointer").innerText = receive_data["userID"];
+    }
+    if(receive_data['start_date']!=null){
+       $("#start_date").val(receive_data['start_date']);
+    }
+    if(receive_data['finish_date']!=null){
+       $("#finish_date").val(receive_data['finish_date']);
+    }
+    if(receive_data['trip_title']!=null){
+       $("#trip_title").val(receive_data['trip_title']);
     }
   };
   $(this).mousemove(function(e){
@@ -158,23 +167,46 @@ $(function(){
   for(var i=0;i < receive_pop_data_length;i++){
     $("#"+receive_pop_data[i][0]).css({'position':'absolute','top':receive_pop_data[i][1],'left':receive_pop_data[i][2]});
   }
+  //ここまでpop_displayのコード
+  $("#trip_title").keyup(function(){
+    var param={};
+    var val = $(this).val();
+    $("#output").text(val);
+    param['trip_title']=val;
+    conn.send(JSON.stringify(param));
+  });
+  $("#start_date").change(function(){
+    var param={};
+    var val = $(this).val();
+    $("#output_1").html(val);
+    param['start_date']=val;
+    conn.send(JSON.stringify(param));
+  }).change();
+  $("#finish_date").change(function(){
+    var param={};
+    var val = $(this).val();
+    $("#output_2").html(val);
+    param['finish_date']=val;
+    conn.send(JSON.stringify(param));
+  }).change();
+
 });
 </script>
-<div id="bms_chat_header">
-  <div id="bms_chat_user_status">
-    <div id="bms_status_icon">●</div>
-    <div id ="bms_chat_user_name">
-      <?php
-      echo $name.'さん';
-      ?>
-      <a href="logout.php">ログアウト</a>
-      <a href="choice.php">グループ切り替え</a>
-      <a href="trip_chat.php">チャットシステムへ</a>
-      <a href="pop_display.php">みんなで相談画面へ</a>
-      <button id="pop_things_save" onclick="save()">保存</button>
-    </div>
-  </div>
+<!-- <div id="bms_chat_header">
+<div id="bms_chat_user_status">
+<div id="bms_status_icon">●</div>
+<div id ="bms_chat_user_name">
+<?php
+echo $name.'さん';
+?>
+<a href="logout.php">ログアウト</a>
+<a href="choice.php">グループ切り替え</a>
+<a href="trip_chat.php">チャットシステムへ</a>
+<a href="pop_display.php">みんなで相談画面へ</a>
+<button id="pop_things_save" onclick="save()">保存</button>
 </div>
+</div>
+</div> -->
 <body>
   <div class="split">
     <div class="split-item pop_display">
@@ -187,6 +219,13 @@ $(function(){
       </div>
     </div>
     <div class="split-item trip_plan">
+      <div><input id="start_date" type="date"></div><p>~</p><div><input id="finish_date" type="date"></div>
+      <div><input id="trip_title" type="text" placeholder="タイトル"></div>
+      <div><input id=trip_main_data type="submit"value="送信"></div>
+      <div>Input: <span id="output"></span></div>
+      <div>Input: <span id="output_1"></span></div>
+      <div>Input: <span id="output_2"></span></div>
+      <div id="trip_date_data"></div>
     </div>
   </div>
   <div id="pointer"></div>
@@ -197,4 +236,5 @@ $(function(){
 //　実験　3-4人の仲良しグループを集める。ディスカッション時間決める。時間を決めないで、どちらが決めやすかったか。
 //　LINE、Googleドキュメント比較。仮定、どうしても会えない人用、集まれない人用。
 //　研究目的を明確化する→それによりプランが決めやすくなる
+// 新着のチャットコメントを出るようにする
 ?>
