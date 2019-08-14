@@ -49,16 +49,27 @@ $(function(){
     if(receive_data["mouseX"]!=null){
       $("#pointer").css({'background-color':"red",'top':receive_data["mouseY"],'left':receive_data["mouseX"]});
       document.getElementById("pointer").innerText = receive_data["userID"];
-    }
+    };
     if(receive_data['start_date']!=null){
-       $("#start_date").val(receive_data['start_date']);
-    }
+      console.log(receive_data['start_date']);
+      $("#start_date").val(receive_data['start_date']);
+    };
     if(receive_data['finish_date']!=null){
-       $("#finish_date").val(receive_data['finish_date']);
-    }
+      console.log(receive_data['finish_date']);
+      $("#finish_date").val(receive_data['finish_date']);
+    };
     if(receive_data['trip_title']!=null){
-       $("#trip_title").val(receive_data['trip_title']);
-    }
+      console.log(receive_data['trip_title']);
+      $("#trip_title").val(receive_data['trip_title']);
+    };
+    if(receive_data['in_trip_day_plan']!=null){
+      console.log(receive_data['in_trip_day_plan']);
+      $("#in_trip_day_plan").val(receive_data['in_trip_day_plan']);
+    };
+    if(receive_data['toMin']!=null){
+      console.log(receive_data['toMin']);
+      $("#toMin").val(receive_data['toMin']);
+    };
   };
   $(this).mousemove(function(e){
     var param_2 ={};
@@ -160,6 +171,14 @@ try {
   echo $e->getMessage() . PHP_EOL;
 }
 ?>
+function trip_day_plan_add(val,val2){
+  val2 = val2+1;
+  console.log(val2);
+  $('#days_'+val).append($('<div id="trip_day_plan'+val2+'"></div>').html('<input id="toMin'+val2+'" type="time" size="2" maxlength="2"> <input id="in_trip_day_plan'+val2+'" type="text" placeholder="予定記入"><input id=trip_day_plan_add type="button" value="追加" onclick="trip_day_plan_add('+val+','+val2+')"><input id=trip_plan type="button" value="登録" onclick="trip_plan_join()">'));
+};
+function trip_plan_join(){
+
+};
 $(function(){
   var receive_pop_data = {};
   receive_pop_data = <?php echo $pop_thing_json;?>;
@@ -171,25 +190,56 @@ $(function(){
   $("#trip_title").keyup(function(){
     var param={};
     var val = $(this).val();
-    $("#output").text(val);
     param['trip_title']=val;
     conn.send(JSON.stringify(param));
   });
   $("#start_date").change(function(){
     var param={};
     var val = $(this).val();
-    $("#output_1").html(val);
     param['start_date']=val;
     conn.send(JSON.stringify(param));
-  }).change();
+  });
   $("#finish_date").change(function(){
     var param={};
     var val = $(this).val();
-    $("#output_2").html(val);
     param['finish_date']=val;
+    var headers = $('[id^=in_trip_day_plan]');
+    console.log(headers);
     conn.send(JSON.stringify(param));
-  }).change();
+  });
+  $("[id^=toMin]").change(function(){
+    var param={};
+    var val = $(this).val();
+    param['toMin']=val;
+    conn.send(JSON.stringify(param));
+    console.log(val);
+  });
+  $("[id^=in_trip_day_plan]").keyup(function(){
+    var param={};
+    var val = $(this).val();
+    param['in_trip_day_plan']=val;
+    conn.send(JSON.stringify(param));
+    console.log(val);
+  });
 
+  <?php
+  if((isset($_POST['start_date'])||isset($_POST['finish_date']))&&isset($_POST['trip_title'])){
+    ?>
+    var start_date_1 = new Date('<?php echo $_POST['start_date'];?>');
+    var start_date = Date.parse('<?php echo $_POST['start_date'];?>');
+    var finish_date = Date.parse('<?php echo $_POST['finish_date'];?>');
+    var date_diff = Math.floor((finish_date-start_date)/1000/60/60/24);
+    $('#output').html('<?php echo $_POST['trip_title'];?>');
+    for(var i=0;i <= date_diff;i++){
+      var get_month = start_date_1.getMonth()+1;
+      $('#trip_date_data').append($('<div id="days_'+i+'"></div>').html(start_date_1.getFullYear() + "/" +  get_month +"/"+ start_date_1.getDate()));
+      //$('#days_'+i).append($('<div></div>').html('<input id="trip_day_plan_add" type="button"value=予定追加 onclick="trip_day_plan_add('+i+',0)">'));
+      $('#days_'+i).append($('<div id="trip_day_plan'+0+'"></div>').html('<input id="toMin'+0+'" type="time" size="2" maxlength="2"><input id="in_trip_day_plan'+0+'" type="text" placeholder="予定記入"> <input id=trip_plan_add type="button" value="追加" onclick="trip_day_plan_add('+i+',0)"><input id=trip_plan type="button" value="登録" onclick="trip_plan_join()">'));
+      start_date_1.setDate(start_date_1.getDate()+1);
+    }
+    <?php
+  }
+  ?>
 });
 </script>
 <!-- <div id="bms_chat_header">
@@ -219,13 +269,14 @@ echo $name.'さん';
       </div>
     </div>
     <div class="split-item trip_plan">
-      <div><input id="start_date" type="date"></div><p>~</p><div><input id="finish_date" type="date"></div>
-      <div><input id="trip_title" type="text" placeholder="タイトル"></div>
-      <div><input id=trip_main_data type="submit"value="送信"></div>
-      <div>Input: <span id="output"></span></div>
-      <div>Input: <span id="output_1"></span></div>
-      <div>Input: <span id="output_2"></span></div>
+      <form id="trip_data" action="trip_planning.php" method="post">
+        <div><input id="start_date" name="start_date" type="date"></div><p>~</p><div><input id="finish_date" name="finish_date" type="date"></div>
+        <div><input id="trip_title" name="trip_title"type="text" placeholder="タイトル"></div>
+        <div><input id=trip_main_data type="submit"value="送信"></div>
+      </form>
+      <div>旅行タイトル：<span id="output"></span></div>
       <div id="trip_date_data"></div>
+      <div><input id=trip_plans type="button" value="保存" onclick="trip_plan_save()"></div>
     </div>
   </div>
   <div id="pointer"></div>
