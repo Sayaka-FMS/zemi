@@ -57,14 +57,16 @@ conn.onclose = function(e) {
 conn.onmessage = function(e) {
   console.log(e.data);
   var receive_data = {}
-  receive_data = JSON.parse(e.data)
+  receive_data = JSON.parse(e.data);
   append_message = receive_data["name"] +":" + receive_data["message"];
   console.log(receive_data["favo"]);
+  if(receive_data["message"]!=null){
   if(receive_data["favo"]==1){
     var inner = $('<div id="bms_messege_p_left_favo"></div>').text(append_message);
   }else{
     var inner = $('<div id="bms_messege_p_left"></div>').text(append_message);
   }
+ }
   var box = $('<div id="box"></div>').html(inner);
   $('#chat').append(box);
   $("#bms_messages").animate({scrollTop:10000});
@@ -140,6 +142,8 @@ function send_favo() {
           ?>
           <a href="logout.php">ログアウト</a>
           <a href="choice.php">グループ切り替え</a>
+          <a href="pop_display.php">みんなで相談画面へ</a>
+          <a href="trip_planning.php">旅行プラン検討へ</a>
         </div>
       </div>
     </div>

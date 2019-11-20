@@ -24,7 +24,7 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 <head>
   <meta charset="utf-8">
   <link type="text/css" rel="stylesheet" href="pop_display.css">
-    <link type="text/css" rel="stylesheet" href="trip_chat.css">
+  <link type="text/css" rel="stylesheet" href="trip_chat.css">
   <title>旅行チャット</title>
 </head>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -49,6 +49,9 @@ $(function(){
     if(receive_data["mouseX"]!=null){
       $("#pointer").css({'background-color':"red",'top':receive_data["mouseY"],'left':receive_data["mouseX"]});
       document.getElementById("pointer").innerText = receive_data["userID"];
+    }
+    if(receive_data["pop_vote_id"]!=null){
+      pop_data_vote(receive_data["pop_vote_id"],receive_data["pop_vote_add"],1);
     }
   };
   $(this).mousemove(function(e){
@@ -105,7 +108,27 @@ function save(){
       data: {
         id:save_popthing[i][0],
         top:save_popthing[i][3],
-        left:save_popthing[i][4]
+        left:save_popthing[i][4],
+      },
+      //Ajax通信が成功した場合に呼び出されるメソッド
+      success: function(data, dataType){
+        //   //デバッグ用 アラートとコンソール
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown){
+        alert('Error : ' + errorThrown);
+        $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+        $("#textStatus").html("textStatus : " + textStatus);
+        $("#errorThrown").html("errorThrown : " + errorThrown);
+      }
+    });
+  }
+  for(var i=0;i < Object.keys(vote).length;i++){
+    $.ajax({
+      type: "POST",
+      url: "trip_data.php",
+      data: {
+        id:favo[i][1],
+        vote:vote[i]
       },
       //Ajax通信が成功した場合に呼び出されるメソッド
       success: function(data, dataType){
@@ -122,6 +145,7 @@ function save(){
 }
 <?php
 //chatデータ表示
+ $favo_json = 0;
 try {
   $stmt = $pdo->query("SELECT count(favo) from trip_chat WHERE group_id = '$group_ID'AND favo='1'");
   $favo_things = $stmt->fetchColumn();
@@ -129,12 +153,13 @@ try {
   $i=0;
   foreach ( $stmt as $value ) {
     if($value['favo']==1){
-      $favo[$i] = $value[ 'message' ];
-      $favo_number[$i] = $value[ 'id' ];
-      //var_dump($favo[$i]);
+      $favo[$i][0] = $value['message'];
+      $favo[$i][1] = $value['id'];
+      $favo[$i][2] = $value['vote'];
       $i++;
     }
   }
+  $favo_json = json_encode($favo);
   $stmt = $pdo->query("SELECT count(*) from group_pop_display_info WHERE group_id = '$group_ID'");
   $pop_things_count = $stmt->fetchColumn();
   $pop_thing_json = 0;
@@ -145,20 +170,46 @@ try {
       $pop_things_position[$l] = array($value['pop_id'],$value['pop_top'],$value['pop_left']);
       $l++;
     }
+    ?>
+    <?php
     $pop_thing_json = json_encode($pop_things_position);
   }
 } catch ( Exception $e ) {
   echo $e->getMessage() . PHP_EOL;
 }
 ?>
+var vote = {};
+var favo = {};
+var favo_length = 0;
 $(function(){
   var receive_pop_data = {};
   receive_pop_data = <?php echo $pop_thing_json;?>;
   receive_pop_data_length = Object.keys(receive_pop_data).length;
   for(var i=0;i < receive_pop_data_length;i++){
-     $("#"+receive_pop_data[i][0]).css({'position':'absolute','top':receive_pop_data[i][1],'left':receive_pop_data[i][2]});
+    $("#"+receive_pop_data[i][0]).css({'position':'absolute','top':receive_pop_data[i][1],'left':receive_pop_data[i][2]});
+  }
+  favo = <?php echo $favo_json;?>;
+  favo_length = Object.keys(favo).length;
+  for(var i=0;i < <?=$favo_things?>;i++){
+    vote[i] = favo[i][2];
   }
 });
+
+function pop_data_vote(val,val2,val3){
+  if(val2==0){
+    vote[val]--;
+  }
+  if(val2==1){
+    vote[val]++;
+  }
+  $('#pop_voting_'+favo[val][1]).text(vote[val]);
+  if(val3 == 0){
+    var param={};
+    param['pop_vote_id'] = val;
+    param['pop_vote_add'] = val2;
+    conn.send(JSON.stringify(param));
+  }
+}
 </script>
 <div id="bms_chat_header">
   <div id="bms_chat_user_status">
@@ -179,7 +230,7 @@ $(function(){
   <div class="selectable">
     <?php
     for($i=0;$i<$favo_things;$i++){
-      echo '<div class="pop_things" id="pop_thing_'.$favo_number[$i].'">'.$favo[$i].'</div>';
+      echo '<div class="pop_things" id="pop_thing_'.$favo[$i][1].'">'.$favo[$i][0].'<input type=button id="pop_voting" value= "-" onclick="pop_data_vote('.$i.',0,0)"><div id="pop_voting_'.$favo[$i][1].'">'.$favo[$i][2].'</div><input type=button id="pop_voting" value= "+" onclick="pop_data_vote('.$i.',1,0)"></div>';
     }
     ?>
   </div>

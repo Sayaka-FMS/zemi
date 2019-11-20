@@ -82,6 +82,9 @@ $(function(){
     if(receive_data['display_title']!=null){
       trip_data_display(receive_data['display_title'],1);
     }
+    if(receive_data['start']!=null){
+      trip_data_decide(1);
+    }
   };
   $(this).mousemove(function(e){
     var param_2 ={};
@@ -303,7 +306,6 @@ function trip_data_display(val,val1){
   receive_trip_data = <?php echo $trip_data_json;?>;
   sort_trip_data = <?php echo $trip_data_json;?>;
   receive_trip_data_length = Object.keys(receive_trip_data).length;
-
   var length_sort = 0;
   for(var id_1 = 0;id_1 < receive_trip_data_length;id_1++){
     var length = 0;
@@ -324,9 +326,9 @@ function trip_data_display(val,val1){
     }
     length_sort = length;
   }
-  console.log(sort_trip_data);
-  //$('#output').html(sort_trip_data[0][0]);
+  $('#output').html(sort_trip_data[0][0]);
   var add = 1;
+  var start_day = sort_trip_data[0][1];
   for(var i=0;i < receive_trip_data_length;i++){
     if(sort_trip_data[i][1] == start_day){
       var str = sort_trip_data[i][2].split('');
@@ -342,19 +344,44 @@ function trip_data_display(val,val1){
       $("#trip_day_plan"+str[0]+str[1]).html(sort_trip_data[i][3]+" "+sort_trip_data[i][4]+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+str[0]+','+str[1]+',0,'+time_context+','+context+')">');
       add++;
     }else{
-       var start_day = new Date(start_day);
-      // var get_month = start_date_1.getMonth()+1;
-       start_day.setDate(start_day.getDate()+1);
-       var get_month =  start_day.getMonth()+1;
-       start_day = start_day.getFullYear() + "-" +  get_month +"-"+ start_day.getDate();
-       i--;
-       add = 1;
+      start_day = new Date(start_day);
+      var get_month = start_day.getMonth()+1;
+      start_day.setDate(start_day.getDate()+1);
+      var get_month =  start_day.getMonth()+1;
+      start_day = start_day.getFullYear() + "-" +  get_month +"-"+ start_day.getDate();
+      i--;
+      add = 1;
     }
   }
   if(val1 == 0){
     var param={};
     param['display_title'] = val;
-    //param['trip_title']=val;
+    conn.send(JSON.stringify(param));
+  }
+};
+
+function trip_data_decide(val){
+  var start_date_1 = new Date($("#start_date").val());
+  var start_date = Date.parse($("#start_date").val());
+  var finish_date = Date.parse($("#finish_date").val());
+  var date_diff = Math.floor((finish_date-start_date)/1000/60/60/24);
+  $('#output').html($("#trip_title").val());
+  var output = $('#output').html($("#trip_title").val());
+  for(var i=0;i <= date_diff;i++){
+    var get_month = start_date_1.getMonth()+1;
+    var date = start_date_1.getFullYear() + "-" +  get_month +"-"+ start_date_1.getDate();
+    $('#trip_date_data').append($('<div id="days_'+i+'"></div>').html(date));
+    add_val[i] = 0;
+    $('#days_'+i).append($('<input id=trip_plan_add type="button" value="追加" onclick="trip_day_plan_add('+i+',0)">'));
+    $('#days_'+i).append($('<div id="trip_day_plan'+i+0+'"></div>').html('<div id="trip_day_plan'+i+0+'"></div>').html('<input class="toMin" id="toMin'+i+0+'" type="time" size="2" maxlength="2"><input class="in_trip_day_plan" id="in_trip_day_plan'+i+0+'" type="text" placeholder="予定記入"> <input id=trip_plan type="button" value="登録" onclick="trip_plan_join('+i+',0,0)">'));
+    start_date_1.setDate(start_date_1.getDate()+1);
+  }
+  if(val == 0){
+    var param={};
+    param['start'] = start_date_1;
+    param['finish'] = finish_date;
+    param['title'] = output;
+    console.log(param);
     conn.send(JSON.stringify(param));
   }
 };
@@ -404,31 +431,9 @@ $(function(){
     param['in_trip_day_plan_id']=id;
     conn.send(JSON.stringify(param));
   });
-
-  <?php
-  if((isset($_POST['start_date'])||isset($_POST['finish_date']))&&isset($_POST['trip_title'])){
-    ?>
-    var start_date_1 = new Date('<?php echo $_POST['start_date'];?>');
-    var start_date = Date.parse('<?php echo $_POST['start_date'];?>');
-    var finish_date = Date.parse('<?php echo $_POST['finish_date'];?>');
-    var date_diff = Math.floor((finish_date-start_date)/1000/60/60/24);
-    $('#output').html('<?php echo $_POST['trip_title'];?>');
-    for(var i=0;i <= date_diff;i++){
-      var get_month = start_date_1.getMonth()+1;
-      var date = start_date_1.getFullYear() + "-" +  get_month +"-"+ start_date_1.getDate();
-      $('#trip_date_data').append($('<div id="days_'+i+'"></div>').html(date));
-      add_val[i] = 0;
-      $('#days_'+i).append($('<input id=trip_plan_add type="button" value="追加" onclick="trip_day_plan_add('+i+',0)">'));
-      //$('#days_'+i).append($('<div></div>').html('<input id="trip_day_plan_add" type="button"value=予定追加 onclick="trip_day_plan_add('+i+',0)">'));
-      $('#days_'+i).append($('<div id="trip_day_plan'+i+0+'"></div>').html('<div id="trip_day_plan'+i+0+'"></div>').html('<input class="toMin" id="toMin'+i+0+'" type="time" size="2" maxlength="2"><input class="in_trip_day_plan" id="in_trip_day_plan'+i+0+'" type="text" placeholder="予定記入"> <input id=trip_plan type="button" value="登録" onclick="trip_plan_join('+i+',0,0)">'));
-      start_date_1.setDate(start_date_1.getDate()+1);
-    }
-    <?php
-  }
-  ?>
 });
 </script>
-<!-- <div id="bms_chat_header">
+<div id="bms_chat_header">
 <div id="bms_chat_user_status">
 <div id="bms_status_icon">●</div>
 <div id ="bms_chat_user_name">
@@ -442,7 +447,7 @@ echo $name.'さん';
 <button id="pop_things_save" onclick="save()">保存</button>
 </div>
 </div>
-</div> -->
+</div>
 <body>
   <div class="split">
     <div class="split-item pop_display">
@@ -469,7 +474,7 @@ echo $name.'さん';
       <form id="trip_data" action="trip_planning.php" method="post">
         <div><input id="start_date" name="start_date" type="date"></div><p>~</p><div><input id="finish_date" name="finish_date" type="date"></div>
         <div><input id="trip_title" name="trip_title" type="text" placeholder="タイトル"></div>
-        <div><input id=trip_main_data type="submit" value="送信"></div>
+        <div><input id=trip_main_data type="button" value="送信" onclick="trip_data_decide(0)"></div>
       </form>
       <div>旅行タイトル：<span id="output"></span></div>
       <div id="trip_date_data"></div>

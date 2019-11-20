@@ -6,6 +6,8 @@ if ( isset( $_SESSION[ 'username' ] ) ) {
   $userID = $_SESSION['userID'];
   $group_ID = $_SESSION['group_ID'];
 }
+$name = $_POST['name'];
+$userID = $_POST['userID'];
 
 $dsn = 'mysql:host=localhost;dbname=test;charset=utf8mb4';
 $username = 'root';
@@ -22,14 +24,29 @@ if ( isset( $_POST['message'] ) ) {
   //$message = $_POST[ 'message' ];
   //chatデータ入れる
   $message = $_POST['message'];
+  if($_POST['favo']==1){
+    $favo = 1;
+  }else{
+    $favo = 0;
+  }
   try {
-    $stmt = $pdo->prepare( "INSERT INTO trip_chat(userID,name,message,group_id) VALUES (?, ?, ?,?)" );
-    $stmt->execute( array( $userID, $name, $message, $group_ID ) );
+    $stmt = $pdo->prepare( "INSERT INTO trip_chat(userID,name,message,group_id,favo) VALUES (?, ?, ?,?,?)" );
+    $stmt->execute( array( $userID, $name,$message,$group_ID,$favo ) );
     //header('Location:trip_chat.php',true,303);
   } catch ( Exception $e ) {
     echo $e->getMessage() . PHP_EOL;
   }
-} else {
+}
+
+if(isset( $_POST['id'] )){
+  try {
+    $id = $_POST['id'];
+    $vote = $_POST['vote'];
+    $stmt = $pdo->query( "UPDATE trip_chat SET vote='$vote' WHERE id = '$id'" );
+    //header('Location:trip_chat.php',true,303);
+  } catch ( Exception $e ) {
+    echo $e->getMessage() . PHP_EOL;
+  }
 
 }
 
