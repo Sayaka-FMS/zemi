@@ -9,6 +9,7 @@ if ( isset( $_SESSION[ 'username' ] ) ) {
 } else {
   header("Location:login.php");
 }
+
 $dsn = 'mysql:host=localhost;dbname=test;charset=utf8mb4';
 $username = 'root';
 $password = '';
@@ -35,15 +36,14 @@ var conn = new WebSocket('ws://localhost:8080');
 var multi_login_count = 0;
 var save_popthing = [];
 var receive_data = [];
+var add_val = [];
 $(function(){
   conn.onmessage = function(e) {
     receive_data = JSON.parse(e.data);
-    //console.log(receive_data["mes"]);
     if(receive_data["mes"]!=null){
       $("#"+receive_data["mes"]).css({'top':receive_data["top"],'left':receive_data["left"]});
       if(receive_data["drag"] !=1){
         save_popthing.push([receive_data["mes"],receive_data["top"],receive_data["left"],receive_data["offset_top"],receive_data["offset_left"]]);
-        //console.log(save_popthing);
       }
     };
     if(receive_data["mouseX"]!=null){
@@ -51,23 +51,18 @@ $(function(){
       document.getElementById("pointer").innerText = receive_data["userID"];
     };
     if(receive_data['start_date']!=null){
-      //console.log(receive_data['start_date']);
       $("#start_date").val(receive_data['start_date']);
     };
     if(receive_data['finish_date']!=null){
-      //console.log(receive_data['finish_date']);
       $("#finish_date").val(receive_data['finish_date']);
     };
     if(receive_data['trip_title']!=null){
-      //console.log(receive_data['trip_title']);
       $("#trip_title").val(receive_data['trip_title']);
     };
     if(receive_data['in_trip_day_plan']!=null){
-      //console.log(receive_data);
       $("#"+receive_data['in_trip_day_plan_id']).val(receive_data['in_trip_day_plan']);
     };
     if(receive_data['toMin']!=null){
-      //console.log(receive_data);
       $("#"+receive_data['toMin_id']).val(receive_data['toMin']);
     };
     if(receive_data['val']!=null){
@@ -85,6 +80,19 @@ $(function(){
     if(receive_data['start']!=null){
       trip_data_decide(1);
     }
+    if(receive_data["pop_vote_id"]!=null){
+      pop_data_vote(receive_data["pop_vote_id"],receive_data["pop_vote_add"],1);
+    }
+    if(receive_data["message"]!=null){
+      append_message = receive_data["name"] +":" + receive_data["message"];
+      alert(append_message+" と送信しました");
+    }
+    if(receive_data["save"]!=null){
+      alert(receive_data["name"]+"がポップデータを保存しました");
+    }
+    if(receive_data["save_plan"]!=null){
+      alert(receive_data["name"]+"が旅行プランを保存しました");
+    }
   };
   $(this).mousemove(function(e){
     var param_2 ={};
@@ -101,12 +109,9 @@ $(function(){
       param["top"] = ui.position.top;
       param["left"] = ui.position.left;
       var id = $(this).attr('id');
-      //console.log(this);
       param["mes"] = id;
       param["drag"] = 1;
-      //console.log(id);
       conn.send(JSON.stringify(param));
-      //console.log(' top: ' + ui.position.top + ' left: ' + ui.position.left);
     },
     stop: function(e, ui) {
       var param ={};
@@ -115,21 +120,37 @@ $(function(){
       param["offset_top"] = ui.offset.top;
       param["offset_left"] = ui.offset.left;
       var id = $(this).attr('id');
-      //console.log(this);
       param["mes"] = id;
       param["drag"] = 0;
-      //console.log(id);
       conn.send(JSON.stringify(param));
-      //console.log(' top: ' + ui.position.top + ' left: ' + ui.position.left);
       save_popthing.push([id,ui.position.top,ui.position.left,ui.offset.top,ui.offset.left]);
-      //save_popthing= [[id,ui.position.top,ui.position.left]];
-      //console.log(save_popthing);
     }
   });
   $('.selectable').selectable({
     // selected: onSelected,
     // unselected: onUnselected
   });
+  <?php
+  if(isset($_SESSION['display_title'])){
+    ?>
+    trip_data_display('<?=$_SESSION['display_title']?>',1);
+    <?php
+  }
+  if(isset($_SESSION['start_date'])){
+    ?>
+    trip_data_decide(1,1);
+    <?php
+  }
+  if(isset($_SESSION['add_val'])){
+    for($i=0;$i < count($_SESSION['add_val']);$i++){
+      for($l=0;$l < $_SESSION['add_val'][$i];$l++){
+        ?>
+        trip_day_plan_add('<?= $i?>',1);
+        <?php
+      }
+    }
+  }
+  ?>
 });
 function trip_plan_save(){
   var save_context=[];
@@ -148,7 +169,6 @@ function trip_plan_save(){
       if(trip_data.length > 2){
         for(var n=1;n<trip_data.length-1;n++){
           trip_data[1] = trip_data[1]+' '+trip_data[n+1];
-          console.log('ok');
         }
       }
       var title = $('#output').text();
@@ -174,10 +194,13 @@ function trip_plan_save(){
       });
     };
   };
+  var param={};
+  param["name"] = '<?php echo $name;?>';
+  param['save_plan'] = 1;
+  conn.send(JSON.stringify(param));
 };
 
 function save(){
-  //console.log(save_popthing.length);
   for(var i=0;i < save_popthing.length;i++){
     $.ajax({
       type: "POST",
@@ -199,9 +222,34 @@ function save(){
       }
     });
   }
+  for(var i=0;i < Object.keys(vote).length;i++){
+    $.ajax({
+      type: "POST",
+      url: "trip_data.php",
+      data: {
+        id:favo[i][1],
+        vote:vote[i]
+      },
+      //Ajax通信が成功した場合に呼び出されるメソッド
+      success: function(data, dataType){
+        //   //デバッグ用 アラートとコンソール
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown){
+        alert('Error : ' + errorThrown);
+        $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+        $("#textStatus").html("textStatus : " + textStatus);
+        $("#errorThrown").html("errorThrown : " + errorThrown);
+      }
+    });
+  }
+  var param={};
+  param["name"] = '<?php echo $name;?>';
+  param['save'] = 1;
+  conn.send(JSON.stringify(param));
 }
 <?php
 //chatデータ表示
+$favo_json = 0;
 try {
   $stmt = $pdo->query("SELECT count(favo) from trip_chat WHERE group_id = '$group_ID'AND favo='1'");
   $favo_things = $stmt->fetchColumn();
@@ -209,12 +257,13 @@ try {
   $i=0;
   foreach ( $stmt as $value ) {
     if($value['favo']==1){
-      $favo[$i] = $value[ 'message' ];
-      $favo_number[$i] = $value[ 'id' ];
-      //var_dump($favo[$i]);
+      $favo[$i][0] = $value['message'];
+      $favo[$i][1] = $value['id'];
+      $favo[$i][2] = $value['vote'];
       $i++;
     }
   }
+  $favo_json = json_encode($favo);
   // popデータ
   $stmt = $pdo->query("SELECT count(*) from group_pop_display_info WHERE group_id = '$group_ID'");
   $pop_things_count = $stmt->fetchColumn();
@@ -235,11 +284,11 @@ try {
     $title_0[$i] = $value['title'];
     $i++;
   }
+  $h = 0;
+  $trip_data_file = array();
   for($n=0; $n < $i ;$n++){
     $title = $title_0[$n];
     $stmt = $pdo->query("SELECT * from trip_plan_info WHERE group_id = '$group_ID' AND title = '$title'");
-    $trip_data_file = array();
-    $h = 0;
     foreach ( $stmt as $value ) {
       $trip_data_file[$h][0] = $value['title'];
       $trip_data_file[$h][1] = $value['trip_day'];
@@ -254,11 +303,10 @@ try {
   echo $e->getMessage() . PHP_EOL;
 }
 ?>
-var add_val = [];
+
 function trip_day_plan_add(val,val3){
   var val2 = add_val[val]+1;
   $('#days_'+val).append($('<div id="trip_day_plan'+val+val2+'"></div>').html('<input id="toMin'+val+val2+'" type="time" size="2" maxlength="2"> <input id="in_trip_day_plan'+val+val2+'" type="text" placeholder="予定記入"><input id=trip_plan type="button" value="登録" onclick="trip_plan_join('+val+','+val2+',0)">'));
-  console.log(add_val[val],val,val3);
   if(val3==0){
     var param={};
     param['val'] = val;
@@ -267,6 +315,13 @@ function trip_day_plan_add(val,val3){
     conn.send(JSON.stringify(param));
   }
   add_val[val]++;
+  $.ajax({
+    type: "POST",
+    url: "trip_planning_data.php",
+    data: {
+      add_val:add_val
+    }
+  });
 };
 function trip_plan_join(val,val2,val3){
   var context = $("#in_trip_day_plan"+val+val2).val();
@@ -303,70 +358,98 @@ function trip_plan_change(val,val2,val3,val4,val5){
 function trip_data_display(val,val1){
   var receive_trip_data = {};
   var sort_trip_data = [];
-  receive_trip_data = <?php echo $trip_data_json;?>;
   sort_trip_data = <?php echo $trip_data_json;?>;
-  receive_trip_data_length = Object.keys(receive_trip_data).length;
+  receive_trip_data_length = Object.keys(sort_trip_data).length;
   var length_sort = 0;
-  for(var id_1 = 0;id_1 < receive_trip_data_length;id_1++){
-    var length = 0;
-    for(var i=0;i < receive_trip_data_length;i++){
-      var str = receive_trip_data[i][2].split('');
-      if(str[0] == id_1){
+  var title_save = {};
+  var data_num = 0;
+  var add = 1;
+  var start_day = sort_trip_data[0][1];
+  <?php
+  if(isset($_SESSION['length_sort'])){
+    for($i=0;$i < $_SESSION['length_sort'];$i++){
+      ?>
+      $('#days_'+<?= $i?>).remove();
+      <?php
+    }
+  }
+  ?>
+  for(var i=0;i < receive_trip_data_length;i++){
+    if(sort_trip_data[i][0]==val){
+      $('#output').html(sort_trip_data[i][0]);
+      if(sort_trip_data[i][1] == start_day){
+        var str = sort_trip_data[i][2].split('');
         if(str[1]==null){
           str[1] = "0";
         }
-        var data_num = Number(str[1])+length_sort;
-        sort_trip_data[data_num][0] = receive_trip_data[i][0];
-        sort_trip_data[data_num][1] = receive_trip_data[i][1];
-        sort_trip_data[data_num][2] = receive_trip_data[i][2];
-        sort_trip_data[data_num][3] = receive_trip_data[i][3];
-        sort_trip_data[data_num][4] = receive_trip_data[i][4];
-        length++;
+        $('#trip_date_data').append($('<div id="days_'+str[0]+'"></div>').html(sort_trip_data[i][1]));
+        add_val[str[0]] = add;
+        $('#days_'+str[0]).append($('<input id=trip_plan_add type="button" value="追加" onclick="trip_day_plan_add('+str[0]+',0)">'));
+        $('#days_'+str[0]).append($('<div id="trip_day_plan'+str[0]+str[1]+'"></div>'));
+        var time_context = "'"+sort_trip_data[i][3]+"'";
+        var context = "'"+sort_trip_data[i][4]+"'";
+        $("#trip_day_plan"+str[0]+str[1]).html(sort_trip_data[i][3]+" "+sort_trip_data[i][4]+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+str[0]+','+str[1]+',0,'+time_context+','+context+')">');
+        add++;
+        add_val[str[0]] = str[1];
+        length_sort++;
+      }else{
+        start_day = new Date(start_day);
+        var get_month = start_day.getMonth()+1;
+        start_day.setDate(start_day.getDate()+1);
+        var get_month =  start_day.getMonth()+1;
+        start_day = start_day.getFullYear() + "-" +  get_month +"-"+ start_day.getDate();
+        i--;
+        add = 1;
       }
-    }
-    length_sort = length;
-  }
-  $('#output').html(sort_trip_data[0][0]);
-  var add = 1;
-  var start_day = sort_trip_data[0][1];
-  for(var i=0;i < receive_trip_data_length;i++){
-    if(sort_trip_data[i][1] == start_day){
-      var str = sort_trip_data[i][2].split('');
-      if(str[1]==null){
-        str[1] = "0";
-      }
-      $('#trip_date_data').append($('<div id="days_'+str[0]+'"></div>').html(sort_trip_data[i][1]));
-      add_val[str[0]] = add;
-      $('#days_'+str[0]).append($('<input id=trip_plan_add type="button" value="追加" onclick="trip_day_plan_add('+str[0]+','+add+')">'));
-      $('#days_'+str[0]).append($('<div id="trip_day_plan'+str[0]+str[1]+'"></div>'));
-      var time_context = "'"+sort_trip_data[i][3]+"'";
-      var context = "'"+sort_trip_data[i][4]+"'";
-      $("#trip_day_plan"+str[0]+str[1]).html(sort_trip_data[i][3]+" "+sort_trip_data[i][4]+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+str[0]+','+str[1]+',0,'+time_context+','+context+')">');
-      add++;
-    }else{
-      start_day = new Date(start_day);
-      var get_month = start_day.getMonth()+1;
-      start_day.setDate(start_day.getDate()+1);
-      var get_month =  start_day.getMonth()+1;
-      start_day = start_day.getFullYear() + "-" +  get_month +"-"+ start_day.getDate();
-      i--;
-      add = 1;
     }
   }
   if(val1 == 0){
     var param={};
     param['display_title'] = val;
     conn.send(JSON.stringify(param));
+    $.ajax({
+      type: "POST",
+      url: "trip_planning_data.php",
+      data: {
+        display_title:val,
+        display_length:length_sort
+      }
+    });
   }
 };
 
-function trip_data_decide(val){
-  var start_date_1 = new Date($("#start_date").val());
-  var start_date = Date.parse($("#start_date").val());
-  var finish_date = Date.parse($("#finish_date").val());
+function trip_data_decide(val,val1){
+  <?php
+  if(isset($_SESSION['length_sort'])){
+    for($i=0;$i < $_SESSION['length_sort'];$i++){
+      ?>
+      $('#days_'+<?= $i?>).remove();
+      <?php
+    }
+  }
+  ?>
+  if(val1==1){
+    var start_date_1 = 0;
+    var start_date = <?=@$_SESSION['start_date']?>;
+    var finish_date = <?=@$_SESSION['finish_date']?>;
+    start_date_1 = new Date(start_date);
+    $('#output').html('<?=@$_SESSION['trip_title']?>');
+    var output = $('#output').html('<?=@$_SESSION['trip_title']?>');
+    var date_diff = Math.floor((finish_date-start_date)/1000/60/60/24);
+  }else{
+    var start_date_1 = new Date($("#start_date").val());
+    var start_date = Date.parse($("#start_date").val());
+    var finish_date = Date.parse($("#finish_date").val());
+    $('#output').html($("#trip_title").val());
+    var output = $('#output').html($("#trip_title").val());
+    var date_diff = 0;
+    date_diff = '<?=@$_SESSION['date_diff']?>';
+    console.log(date_diff);
+    for(var i=0;i <= date_diff;i++){
+      $('#days_'+i).remove();
+    }
+  }
   var date_diff = Math.floor((finish_date-start_date)/1000/60/60/24);
-  $('#output').html($("#trip_title").val());
-  var output = $('#output').html($("#trip_title").val());
   for(var i=0;i <= date_diff;i++){
     var get_month = start_date_1.getMonth()+1;
     var date = start_date_1.getFullYear() + "-" +  get_month +"-"+ start_date_1.getDate();
@@ -381,17 +464,35 @@ function trip_data_decide(val){
     param['start'] = start_date_1;
     param['finish'] = finish_date;
     param['title'] = output;
-    console.log(param);
     conn.send(JSON.stringify(param));
+    $.ajax({
+      type: "POST",
+      url: "trip_planning_data.php",
+      data: {
+        start_date:start_date,
+        finish_date:finish_date,
+        trip_title:$("#trip_title").val(),
+        date_diff:date_diff
+      }
+    });
+    console.log(new Date($("#start_date").val()));
   }
 };
 
+var vote = {};
+var favo = {};
+var favo_length = 0;
 $(function(){
   var receive_pop_data = {};
   receive_pop_data = <?php echo $pop_thing_json;?>;
   receive_pop_data_length = Object.keys(receive_pop_data).length;
   for(var i=0;i < receive_pop_data_length;i++){
     $("#"+receive_pop_data[i][0]).css({'position':'absolute','top':receive_pop_data[i][1],'left':receive_pop_data[i][2]});
+  }
+  favo = <?php echo $favo_json;?>;
+  favo_length = Object.keys(favo).length;
+  for(var i=0;i < <?=$favo_things?>;i++){
+    vote[i] = favo[i][2];
   }
   //ここまでpop_displayのコード
   $("#trip_title").keyup(function(){
@@ -417,7 +518,6 @@ $(function(){
     var param={};
     var val = $(this).val();
     var id = $(this).attr('id');
-    //console.log(id);
     param['toMin']=val;
     param['toMin_id']=id;
     conn.send(JSON.stringify(param));
@@ -426,37 +526,55 @@ $(function(){
     var param={};
     var val = $(this).val();
     var id = $(this).attr('id');
-    // console.log(id);
     param['in_trip_day_plan']=val;
     param['in_trip_day_plan_id']=id;
     conn.send(JSON.stringify(param));
   });
 });
+
+function pop_data_vote(val,val2,val3){
+  if(val2==0){
+    vote[val]--;
+  }
+  if(val2==1){
+    vote[val]++;
+  }
+  $('#pop_voting_'+favo[val][1]).text(vote[val]);
+  if(val3 == 0){
+    var param={};
+    param['pop_vote_id'] = val;
+    param['pop_vote_add'] = val2;
+    conn.send(JSON.stringify(param));
+  }
+}
+
 </script>
 <div id="bms_chat_header">
-<div id="bms_chat_user_status">
-<div id="bms_status_icon">●</div>
-<div id ="bms_chat_user_name">
-<?php
-echo $name.'さん';
-?>
-<a href="logout.php">ログアウト</a>
-<a href="choice.php">グループ切り替え</a>
-<a href="trip_chat.php">チャットシステムへ</a>
-<a href="pop_display.php">みんなで相談画面へ</a>
-<button id="pop_things_save" onclick="save()">保存</button>
-</div>
-</div>
+  <div id="bms_chat_user_status">
+    <div id="bms_status_icon">●</div>
+    <div id ="bms_chat_user_name">
+      <?php
+      echo $name.'さん';
+      ?>
+      <a href="logout.php">ログアウト</a>
+      <a href="choice.php">グループ切り替え</a>
+      <a href="trip_chat.php">チャットシステムへ</a>
+      <a href="pop_display.php">みんなで相談画面へ</a>
+      <button id="pop_things_save" onclick="save()">保存</button>
+    </div>
+  </div>
 </div>
 <body>
-  <div class="split">
-    <div class="split-item pop_display">
-      <div class="selectable">
-        <?php
-        for($i=0;$i<$favo_things;$i++){
-          echo '<div class="pop_things" id="pop_thing_'.$favo_number[$i].'">'.$favo[$i].'</div>';
-        }
-        ?>
+  <div id=plan_css>
+    <div class="split">
+      <div class="split-item pop_display">
+        <div class="selectable">
+          <?php
+          for($i=0;$i<$favo_things;$i++){
+            echo '<div class="pop_things" id="pop_thing_'.$favo[$i][1].'">'.$favo[$i][0].'<input type=button id="pop_voting" value= "-" onclick="pop_data_vote('.$i.',0,0)"><div id="pop_voting_'.$favo[$i][1].'">'.$favo[$i][2].'</div><input type=button id="pop_voting" value= "+" onclick="pop_data_vote('.$i.',1,0)"></div>';
+          }
+          ?>
+        </div>
       </div>
     </div>
     <div class="split-item trip_plan">
@@ -474,7 +592,7 @@ echo $name.'さん';
       <form id="trip_data" action="trip_planning.php" method="post">
         <div><input id="start_date" name="start_date" type="date"></div><p>~</p><div><input id="finish_date" name="finish_date" type="date"></div>
         <div><input id="trip_title" name="trip_title" type="text" placeholder="タイトル"></div>
-        <div><input id=trip_main_data type="button" value="送信" onclick="trip_data_decide(0)"></div>
+        <div><input id=trip_main_data type="button" value="送信" onclick="trip_data_decide(0,0)"></div>
       </form>
       <div>旅行タイトル：<span id="output"></span></div>
       <div id="trip_date_data"></div>
@@ -492,4 +610,5 @@ echo $name.'さん';
 // 新着のチャットコメントを出るようにする
 //　プランの日にち・時間を決めるとき、アラートで出すようにする
 // 10-24 memo データが保存されない、値はすべて取得されているが、#days＿　で、余計な時間を取得している　php事態にエラーが出ているか確認　
+// 11-22　addがうまくいかない　複数追加した時の動作をやる
 ?>

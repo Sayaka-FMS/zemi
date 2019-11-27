@@ -38,12 +38,10 @@ $(function(){
   conn.onmessage = function(e) {
     var receive_data = {}
     receive_data = JSON.parse(e.data);
-    //console.log(receive_data["mes"]);
     if(receive_data["mes"]!=null){
       $("#"+receive_data["mes"]).css({'top':receive_data["top"],'left':receive_data["left"]});
       if(receive_data["drag"] !=1){
         save_popthing.push([receive_data["mes"],receive_data["top"],receive_data["left"],receive_data["offset_top"],receive_data["offset_left"]]);
-        console.log(save_popthing);
       }
     };
     if(receive_data["mouseX"]!=null){
@@ -52,6 +50,16 @@ $(function(){
     }
     if(receive_data["pop_vote_id"]!=null){
       pop_data_vote(receive_data["pop_vote_id"],receive_data["pop_vote_add"],1);
+    }
+    if(receive_data["message"]!=null){
+      append_message = receive_data["name"] +":" + receive_data["message"];
+      alert(append_message+"  "+"と送信しました");
+    }
+    if(receive_data["save"]!=null){
+      alert(receive_data["name"]+"がポップデータを保存しました");
+    }
+    if(receive_data["save_plan"]!=null){
+      alert(receive_data["name"]+"が旅行プランを保存しました");
     }
   };
   $(this).mousemove(function(e){
@@ -69,12 +77,9 @@ $(function(){
       param["top"] = ui.position.top;
       param["left"] = ui.position.left;
       var id = $(this).attr('id');
-      //console.log(this);
       param["mes"] = id;
       param["drag"] = 1;
-      //console.log(id);
       conn.send(JSON.stringify(param));
-      //console.log(' top: ' + ui.position.top + ' left: ' + ui.position.left);
     },
     stop: function(e, ui) {
       var param ={};
@@ -83,15 +88,18 @@ $(function(){
       param["offset_top"] = ui.offset.top;
       param["offset_left"] = ui.offset.left;
       var id = $(this).attr('id');
-      //console.log(this);
       param["mes"] = id;
       param["drag"] = 0;
-      console.log(id);
       conn.send(JSON.stringify(param));
-      console.log(' top: ' + ui.position.top + ' left: ' + ui.position.left);
       save_popthing.push([id,ui.position.top,ui.position.left,ui.offset.top,ui.offset.left]);
       //save_popthing= [[id,ui.position.top,ui.position.left]];
-      console.log(save_popthing);
+      $.ajax({
+        type: "POST",
+        url: "pop_thing_data.php",
+        data: {
+          ses:save_popthing,
+        }
+      });
     }
   });
   $('.selectable').selectable({
@@ -100,7 +108,6 @@ $(function(){
   });
 });
 function save(){
-  console.log(save_popthing.length);
   for(var i=0;i < save_popthing.length;i++){
     $.ajax({
       type: "POST",
@@ -112,7 +119,7 @@ function save(){
       },
       //Ajax通信が成功した場合に呼び出されるメソッド
       success: function(data, dataType){
-        //   //デバッグ用 アラートとコンソール
+      //デバッグ用 アラートとコンソール
       },
       error: function(XMLHttpRequest, textStatus, errorThrown){
         alert('Error : ' + errorThrown);
@@ -142,6 +149,10 @@ function save(){
       }
     });
   }
+  var param={};
+  param["name"] = '<?php echo $name;?>';
+  param['save'] = 1;
+  conn.send(JSON.stringify(param));
 }
 <?php
 //chatデータ表示
@@ -170,8 +181,6 @@ try {
       $pop_things_position[$l] = array($value['pop_id'],$value['pop_top'],$value['pop_left']);
       $l++;
     }
-    ?>
-    <?php
     $pop_thing_json = json_encode($pop_things_position);
   }
 } catch ( Exception $e ) {
@@ -193,6 +202,24 @@ $(function(){
   for(var i=0;i < <?=$favo_things?>;i++){
     vote[i] = favo[i][2];
   }
+  <?php
+  if(isset($_SESSION['ses'])){
+    for($i=0;$i < count($_SESSION['ses']);$i++){
+      ?>
+        $('#<?=$_SESSION['ses'][$i][0]?>').css({'position':'absolute','top':<?=$_SESSION['ses'][$i][3]?>,'left':<?=$_SESSION['ses'][$i][4]?>});
+        <?php
+    }
+  }
+  ?>
+  <?php
+  if(isset($_SESSION['vote'])){
+    for($i=0;$i<count($_SESSION['vote']);$i++){
+      ?>
+      $('#pop_voting_'+favo[<?=$i?>][1]).text(<?=$_SESSION['vote'][$i]?>);
+      <?php
+    }
+  }
+  ?>
 });
 
 function pop_data_vote(val,val2,val3){
@@ -208,8 +235,16 @@ function pop_data_vote(val,val2,val3){
     param['pop_vote_id'] = val;
     param['pop_vote_add'] = val2;
     conn.send(JSON.stringify(param));
+    $.ajax({
+      type: "POST",
+      url: "pop_thing_data.php",
+      data: {
+        vote:vote
+      },
+    });
   }
 }
+
 </script>
 <div id="bms_chat_header">
   <div id="bms_chat_user_status">

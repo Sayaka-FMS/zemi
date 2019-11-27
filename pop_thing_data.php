@@ -20,6 +20,20 @@ $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 // デフォルトのフェッチモードを連想配列形式に設定
 // (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
 $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
+if(isset($_POST['ses'])){
+  $i = 0;
+  foreach ($_POST['ses'] as $value) {
+    $_SESSION['ses'][$i] = $value;
+    $i++;
+  }
+}
+if(isset($_POST['vote'])){
+  $i = 0;
+  foreach ($_POST['vote'] as $value) {
+    $_SESSION['vote'][$i] = $value;
+    $i++;
+  }
+}
 
 if ( isset( $_POST['id'] ) ) {
   try {
