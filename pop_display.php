@@ -34,6 +34,7 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 var conn = new WebSocket('ws://localhost:8080');
 var multi_login_count = 0;
 var save_popthing = [];
+var stop= 0;
 $(function(){
   conn.onmessage = function(e) {
     var receive_data = {}
@@ -42,6 +43,13 @@ $(function(){
       $("#"+receive_data["mes"]).css({'top':receive_data["top"],'left':receive_data["left"]});
       if(receive_data["drag"] !=1){
         save_popthing.push([receive_data["mes"],receive_data["top"],receive_data["left"],receive_data["offset_top"],receive_data["offset_left"]]);
+        $.ajax({
+          type: "POST",
+          url: "pop_thing_data.php",
+          data: {
+            ses:save_popthing,
+          }
+        });
       }
     };
     if(receive_data["mouseX"]!=null){
@@ -92,7 +100,6 @@ $(function(){
       param["drag"] = 0;
       conn.send(JSON.stringify(param));
       save_popthing.push([id,ui.position.top,ui.position.left,ui.offset.top,ui.offset.left]);
-      //save_popthing= [[id,ui.position.top,ui.position.left]];
       $.ajax({
         type: "POST",
         url: "pop_thing_data.php",
@@ -100,6 +107,7 @@ $(function(){
           ses:save_popthing,
         }
       });
+      stop=1;
     }
   });
   $('.selectable').selectable({
@@ -119,7 +127,7 @@ function save(){
       },
       //Ajax通信が成功した場合に呼び出されるメソッド
       success: function(data, dataType){
-      //デバッグ用 アラートとコンソール
+        //デバッグ用 アラートとコンソール
       },
       error: function(XMLHttpRequest, textStatus, errorThrown){
         alert('Error : ' + errorThrown);
@@ -156,7 +164,7 @@ function save(){
 }
 <?php
 //chatデータ表示
- $favo_json = 0;
+$favo_json = 0;
 try {
   $stmt = $pdo->query("SELECT count(favo) from trip_chat WHERE group_id = '$group_ID'AND favo='1'");
   $favo_things = $stmt->fetchColumn();
@@ -206,8 +214,17 @@ $(function(){
   if(isset($_SESSION['ses'])){
     for($i=0;$i < count($_SESSION['ses']);$i++){
       ?>
-        $('#<?=$_SESSION['ses'][$i][0]?>').css({'position':'absolute','top':<?=$_SESSION['ses'][$i][3]?>,'left':<?=$_SESSION['ses'][$i][4]?>});
-        <?php
+      $('#<?=$_SESSION['ses'][$i][0]?>').css({'position':'absolute','top':<?=$_SESSION['ses'][$i][3]?>,'left':<?=$_SESSION['ses'][$i][4]?>});
+      if(stop!=1){
+        id='<?=$_SESSION['ses'][$i][0]?>';
+        top='<?=$_SESSION['ses'][$i][1]?>';
+        left='<?=$_SESSION['ses'][$i][2]?>';
+        top_1='<?=$_SESSION['ses'][$i][3]?>';
+        left_1='<?=$_SESSION['ses'][$i][4]?>';
+        save_popthing.push([id,top,left,top_1,left_1]);
+        console.log(save_popthing);
+      };
+      <?php
     }
   }
   ?>
@@ -216,6 +233,7 @@ $(function(){
     for($i=0;$i<count($_SESSION['vote']);$i++){
       ?>
       $('#pop_voting_'+favo[<?=$i?>][1]).text(<?=$_SESSION['vote'][$i]?>);
+      vote[<?=$i?>]=<?=$_SESSION['vote'][$i]?>;
       <?php
     }
   }
@@ -235,14 +253,14 @@ function pop_data_vote(val,val2,val3){
     param['pop_vote_id'] = val;
     param['pop_vote_add'] = val2;
     conn.send(JSON.stringify(param));
-    $.ajax({
-      type: "POST",
-      url: "pop_thing_data.php",
-      data: {
-        vote:vote
-      },
-    });
   }
+  $.ajax({
+    type: "POST",
+    url: "pop_thing_data.php",
+    data: {
+      vote:vote
+    },
+  });
 }
 
 </script>

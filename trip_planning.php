@@ -35,7 +35,7 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 var conn = new WebSocket('ws://localhost:8080');
 var multi_login_count = 0;
 var save_popthing = [];
-var receive_data = [];
+var save_context_join = [];
 var add_val = [];
 $(function(){
   conn.onmessage = function(e) {
@@ -124,6 +124,13 @@ $(function(){
       param["drag"] = 0;
       conn.send(JSON.stringify(param));
       save_popthing.push([id,ui.position.top,ui.position.left,ui.offset.top,ui.offset.left]);
+      $.ajax({
+        type: "POST",
+        url: "pop_thing_data.php",
+        data: {
+          ses:save_popthing,
+        }
+      });
     }
   });
   $('.selectable').selectable({
@@ -148,6 +155,32 @@ $(function(){
         trip_day_plan_add('<?= $i?>',1);
         <?php
       }
+    }
+  }
+  ?>
+  <?php
+  if(isset($_SESSION['join_data'])){
+    ?>console.log(<?=count($_SESSION['join_data'])?>);<?php
+    for($i=0;$i<count($_SESSION['join_data']);$i=$i+4){
+      ?>
+      console.log('ok');
+      var val = '<?=$_SESSION['join_data'][$i]?>';
+      var val2 = '<?=$_SESSION['join_data'][$i+1]?>';
+      var time_context = '<?=$_SESSION['join_data'][$i+2]?>';
+      var context = '<?=$_SESSION['join_data'][$i+3]?>';
+      var time_context_1 = "'<?=$_SESSION['join_data'][$i+2]?>'";
+      var context_1 = "'<?=$_SESSION['join_data'][$i+3]?>'";
+      save_context_join.push(val,val2,time_context,context);
+      console.log(save_context_join);
+      $("#trip_day_plan"+val+val2).html(time_context+" "+context+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+val+','+val2+',0,'+time_context_1+','+context_1+')">');
+      $.ajax({
+        type: "POST",
+        url: "trip_planning_data.php",
+        data: {
+          join_data:save_context_join
+        },
+      });
+      <?php
     }
   }
   ?>
@@ -332,11 +365,18 @@ function trip_plan_join(val,val2,val3){
     time_context='00:00';
   };
   $("#trip_day_plan"+val+val2).html(time_context+" "+context+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+val+','+val2+',0,'+time_context_1+','+context_1+')">');
+   save_context_join.push(val,val2,time_context,context);
+   $.ajax({
+     type: "POST",
+     url: "trip_planning_data.php",
+     data: {
+       join_data:save_context_join
+     },
+   });
   if(val3==0){
     var param={};
     param['join_val'] = val;
     param['join_val2'] = val2;
-    //param['trip_title']=val;
     conn.send(JSON.stringify(param));
   }
 };
@@ -344,6 +384,28 @@ function trip_plan_change(val,val2,val3,val4,val5){
   $("#trip_day_plan"+val+val2).html('<input class="toMin" id="toMin'+val+val2+'" type="time" size="2" maxlength="2"><input class="in_trip_day_plan" id="in_trip_day_plan'+val+val2+'" type="text"><input id=trip_plan type="button" value="登録" onclick="trip_plan_join('+val+','+val2+',0)">');
   $("#in_trip_day_plan"+val+val2).val(val5);
   $("#toMin"+val+val2).val(val4);
+  <?php
+  if(@isset($_SESSION['join_data'])){
+    for($i=0;$i<count($_SESSION['join_data']);$i=$i++){
+      ?>
+      console.log(<?=$_SESSION['join_data'][$i]?>,<?=$_SESSION['join_data'][$i+1]?>,val,val2);
+      if(val==<?=$_SESSION['join_data'][$i]?>&&val2==<?=$_SESSION['join_data'][$i+1]?>){
+        <?php
+        unset($_SESSION['join_data'][$i]);
+        unset($_SESSION['join_data'][$i+1]);
+        unset($_SESSION['join_data'][$i+2]);
+        unset($_SESSION['join_data'][$i+3]);
+        $_SESSION['join_data']=array_values($_SESSION['join_data']);
+        ?>
+        save_context_join.splice(<?=$i?>,1);
+        save_context_join.splice(<?=$i+1?>,1);
+        save_context_join.splice(<?=$i+2?>,1);
+        save_context_join.splice(<?=$i+3?>,1);
+      }
+      <?php
+    }
+  }
+  ?>
   if(val3==0){
     var param={};
     param['change_val'] = val;
@@ -430,8 +492,16 @@ function trip_data_decide(val,val1){
   ?>
   if(val1==1){
     var start_date_1 = 0;
-    var start_date = <?=@$_SESSION['start_date']?>;
-    var finish_date = <?=@$_SESSION['finish_date']?>;
+    var start_date = 0;
+    var finish_date = 0;
+    <?php
+    if(isset($_SESSION['start_date'])){
+      ?>
+      var start_date = <?=@$_SESSION['start_date']?>;
+      var finish_date = <?=@$_SESSION['finish_date']?>;
+      <?php
+    }
+    ?>
     start_date_1 = new Date(start_date);
     $('#output').html('<?=@$_SESSION['trip_title']?>');
     var output = $('#output').html('<?=@$_SESSION['trip_title']?>');
@@ -494,6 +564,24 @@ $(function(){
   for(var i=0;i < <?=$favo_things?>;i++){
     vote[i] = favo[i][2];
   }
+  <?php
+  if(isset($_SESSION['ses'])){
+    for($i=0;$i < count($_SESSION['ses']);$i++){
+      ?>
+      $('#<?=$_SESSION['ses'][$i][0]?>').css({'position':'absolute','top':<?=$_SESSION['ses'][$i][3]?>,'left':<?=$_SESSION['ses'][$i][4]?>});
+      <?php
+    }
+  }
+  ?>
+  <?php
+  if(isset($_SESSION['vote'])){
+    for($i=0;$i<count($_SESSION['vote']);$i++){
+      ?>
+      $('#pop_voting_'+favo[<?=$i?>][1]).text(<?=$_SESSION['vote'][$i]?>);
+      <?php
+    }
+  }
+  ?>
   //ここまでpop_displayのコード
   $("#trip_title").keyup(function(){
     var param={};
@@ -514,7 +602,6 @@ $(function(){
     conn.send(JSON.stringify(param));
   });
   $(document).on('change',"[id^=toMin]",function(){
-    //[id^=toMin]
     var param={};
     var val = $(this).val();
     var id = $(this).attr('id');
@@ -545,6 +632,13 @@ function pop_data_vote(val,val2,val3){
     param['pop_vote_id'] = val;
     param['pop_vote_add'] = val2;
     conn.send(JSON.stringify(param));
+    $.ajax({
+      type: "POST",
+      url: "pop_thing_data.php",
+      data: {
+        vote:vote
+      },
+    });
   }
 }
 
@@ -607,8 +701,5 @@ function pop_data_vote(val,val2,val3){
 //　実験　3-4人の仲良しグループを集める。ディスカッション時間決める。時間を決めないで、どちらが決めやすかったか。
 //　LINE、Googleドキュメント比較。仮定、どうしても会えない人用、集まれない人用。
 //　研究目的を明確化する→それによりプランが決めやすくなる
-// 新着のチャットコメントを出るようにする
-//　プランの日にち・時間を決めるとき、アラートで出すようにする
-// 10-24 memo データが保存されない、値はすべて取得されているが、#days＿　で、余計な時間を取得している　php事態にエラーが出ているか確認　
-// 11-22　addがうまくいかない　複数追加した時の動作をやる
+//登録してから、画面を移行すると登録したほうのやつに登録したデータが表示されない
 ?>

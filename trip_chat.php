@@ -67,6 +67,16 @@ conn.onmessage = function(e) {
     var inner = $('<div id="bms_messege_p_left"></div>').text(append_message);
   }
  }
+ if(receive_data["message"]!=null){
+   append_message = receive_data["name"] +":" + receive_data["message"];
+   alert(append_message+"  "+"と送信しました");
+ }
+ if(receive_data["save"]!=null){
+   alert(receive_data["name"]+"がポップデータを保存しました");
+ }
+ if(receive_data["save_plan"]!=null){
+   alert(receive_data["name"]+"が旅行プランを保存しました");
+ }
   var box = $('<div id="box"></div>').html(inner);
   $('#chat').append(box);
   $("#bms_messages").animate({scrollTop:10000});
