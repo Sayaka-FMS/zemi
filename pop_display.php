@@ -19,6 +19,7 @@ $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 // デフォルトのフェッチモードを連想配列形式に設定
 // (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
 $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
+
 ?>
 <html lang="ja">
 <head>
@@ -31,10 +32,11 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 <script src="http://code.jquery.com/jquery-3.4.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
 <script>
+
 var conn = new WebSocket('ws://localhost:8080');
 var multi_login_count = 0;
 var save_popthing = [];
-var stop= 0;
+
 $(function(){
   conn.onmessage = function(e) {
     var receive_data = {}
@@ -43,13 +45,6 @@ $(function(){
       $("#"+receive_data["mes"]).css({'top':receive_data["top"],'left':receive_data["left"]});
       if(receive_data["drag"] !=1){
         save_popthing.push([receive_data["mes"],receive_data["top"],receive_data["left"],receive_data["offset_top"],receive_data["offset_left"]]);
-        $.ajax({
-          type: "POST",
-          url: "pop_thing_data.php",
-          data: {
-            ses:save_popthing,
-          }
-        });
       }
     };
     if(receive_data["mouseX"]!=null){
@@ -100,14 +95,7 @@ $(function(){
       param["drag"] = 0;
       conn.send(JSON.stringify(param));
       save_popthing.push([id,ui.position.top,ui.position.left,ui.offset.top,ui.offset.left]);
-      $.ajax({
-        type: "POST",
-        url: "pop_thing_data.php",
-        data: {
-          ses:save_popthing,
-        }
-      });
-      stop=1;
+      console.log(save_popthing);
     }
   });
   $('.selectable').selectable({
@@ -215,15 +203,8 @@ $(function(){
     for($i=0;$i < count($_SESSION['ses']);$i++){
       ?>
       $('#<?=$_SESSION['ses'][$i][0]?>').css({'position':'absolute','top':<?=$_SESSION['ses'][$i][3]?>,'left':<?=$_SESSION['ses'][$i][4]?>});
-      if(stop!=1){
-        id='<?=$_SESSION['ses'][$i][0]?>';
-        top='<?=$_SESSION['ses'][$i][1]?>';
-        left='<?=$_SESSION['ses'][$i][2]?>';
-        top_1='<?=$_SESSION['ses'][$i][3]?>';
-        left_1='<?=$_SESSION['ses'][$i][4]?>';
-        save_popthing.push([id,top,left,top_1,left_1]);
-        console.log(save_popthing);
-      };
+      save_popthing.push(['<?=$_SESSION['ses'][$i][0]?>','<?=$_SESSION['ses'][$i][1]?>','<?=$_SESSION['ses'][$i][2]?>','<?=$_SESSION['ses'][$i][3]?>','<?=$_SESSION['ses'][$i][4]?>']);
+      console.log(save_popthing);
       <?php
     }
   }
@@ -239,6 +220,8 @@ $(function(){
   }
   ?>
 });
+
+
 
 function pop_data_vote(val,val2,val3){
   if(val2==0){
@@ -261,6 +244,28 @@ function pop_data_vote(val,val2,val3){
       vote:vote
     },
   });
+}
+
+window.onbeforeunload = function () {
+  console.log(save_popthing);
+    $.ajax({
+      type: "POST",
+      url: "pop_thing_data.php",
+      async: false,
+      data: {
+        ses:save_popthing
+      },
+      success: function(data, dataType){
+              //   //デバッグ用 アラートとコンソール
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown){
+        alert('Error : ' + errorThrown);
+        $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+        $("#textStatus").html("textStatus : " + textStatus);
+        $("#errorThrown").html("errorThrown : " + errorThrown);
+      }
+    });
+    return true;
 }
 
 </script>
