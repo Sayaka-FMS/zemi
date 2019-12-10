@@ -68,6 +68,9 @@ $(function(){
     if(receive_data['val']!=null){
       trip_day_plan_add(receive_data['val'],1);
     };
+    if(receive_data['delete_val']!=null){
+      trip_day_plan_delete(receive_data['delete_val'],1);
+    };
     if(receive_data['join_val']!=null){
       trip_plan_join(receive_data['join_val'],receive_data['join_val2'],1);
     };
@@ -140,10 +143,9 @@ $(function(){
   <?php
   if(isset($_SESSION['display_title'])){
     ?>
-    trip_data_display('<?=$_SESSION['display_title']?>',1);
+    trip_data_display('<?=@$_SESSION['display_title']?>',1);
     <?php
-  }
-  if(isset($_SESSION['start_date'])){
+  }else if(isset($_SESSION['start_date'])){
     ?>
     trip_data_decide(1,1);
     <?php
@@ -160,19 +162,21 @@ $(function(){
   ?>
   <?php
   if(isset($_SESSION['join_data'])){
-    ?>console.log(<?=count($_SESSION['join_data'])?>);<?php
     for($i=0;$i<count($_SESSION['join_data']);$i=$i+4){
       ?>
-      console.log('ok');
-      var val = '<?=$_SESSION['join_data'][$i]?>';
-      var val2 = '<?=$_SESSION['join_data'][$i+1]?>';
-      var time_context = '<?=$_SESSION['join_data'][$i+2]?>';
-      var context = '<?=$_SESSION['join_data'][$i+3]?>';
-      var time_context_1 = "'<?=$_SESSION['join_data'][$i+2]?>'";
-      var context_1 = "'<?=$_SESSION['join_data'][$i+3]?>'";
+      var val = '<?=@$_SESSION['join_data'][$i]?>';
+      var val2 = '<?=@$_SESSION['join_data'][$i+1]?>';
+      var time_context = '<?=@$_SESSION['join_data'][$i+2]?>';
+      var time_context_1 = "'<?=@$_SESSION['join_data'][$i+2]?>'";
+      if('<?=@$_SESSION['join_data'][$i+2]?>'==0){
+        time_context='00:00';
+        time_context_1="'00:00'";
+      }
+      var context = '<?=@$_SESSION['join_data'][$i+3]?>';
+      var context_1 = "'<?=@$_SESSION['join_data'][$i+3]?>'";
       save_context_join.push(val,val2,time_context,context);
       console.log(save_context_join);
-      $("#trip_day_plan"+val+val2).html(time_context+" "+context+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+val+','+val2+',0,'+time_context_1+','+context_1+')">');
+      $("#trip_day_plan"+val+val2).html(time_context+"　"+context+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+val+','+val2+',0,'+time_context_1+','+context_1+')">');
       $.ajax({
         type: "POST",
         url: "trip_planning_data.php",
@@ -339,7 +343,7 @@ try {
 
 function trip_day_plan_add(val,val3){
   var val2 = add_val[val]+1;
-  $('#days_'+val).append($('<div id="trip_day_plan'+val+val2+'"></div>').html('<input id="toMin'+val+val2+'" type="time" size="2" maxlength="2"> <input id="in_trip_day_plan'+val+val2+'" type="text" placeholder="予定記入"><input id=trip_plan type="button" value="登録" onclick="trip_plan_join('+val+','+val2+',0)">'));
+  $('#days_'+val).append($('<div id="trip_day_plan'+val+val2+'"></div>').html('<input class="toMin" id="toMin'+val+val2+'" type="time" size="2" maxlength="2"> <input class="in_trip_day_plan" id="in_trip_day_plan'+val+val2+'" type="text" placeholder="予定記入"><input id=trip_plan type="button" value="登録" onclick="trip_plan_join('+val+','+val2+',0)">'));
   if(val3==0){
     var param={};
     param['val'] = val;
@@ -356,6 +360,27 @@ function trip_day_plan_add(val,val3){
     }
   });
 };
+
+function trip_day_plan_delete(val,val3){
+  var val2 = add_val[val];
+  $("#trip_day_plan"+val+val2).remove();
+  if(val3==0){
+    var param={};
+    param['delete_val'] = val;
+    param['delete_val2'] = add_val[val];
+    //param['trip_title']=val;
+    conn.send(JSON.stringify(param));
+  }
+  add_val[val]--;
+  $.ajax({
+    type: "POST",
+    url: "trip_planning_data.php",
+    data: {
+      add_val:add_val
+    }
+  });
+};
+
 function trip_plan_join(val,val2,val3){
   var context = $("#in_trip_day_plan"+val+val2).val();
   var time_context = $("#toMin"+val+val2).val();
@@ -366,6 +391,7 @@ function trip_plan_join(val,val2,val3){
   };
   $("#trip_day_plan"+val+val2).html(time_context+" "+context+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+val+','+val2+',0,'+time_context_1+','+context_1+')">');
    save_context_join.push(val,val2,time_context,context);
+   console.log(save_context_join);
    $.ajax({
      type: "POST",
      url: "trip_planning_data.php",
@@ -388,19 +414,10 @@ function trip_plan_change(val,val2,val3,val4,val5){
   if(@isset($_SESSION['join_data'])){
     for($i=0;$i<count($_SESSION['join_data']);$i=$i++){
       ?>
-      console.log(<?=$_SESSION['join_data'][$i]?>,<?=$_SESSION['join_data'][$i+1]?>,val,val2);
-      if(val==<?=$_SESSION['join_data'][$i]?>&&val2==<?=$_SESSION['join_data'][$i+1]?>){
-        <?php
-        unset($_SESSION['join_data'][$i]);
-        unset($_SESSION['join_data'][$i+1]);
-        unset($_SESSION['join_data'][$i+2]);
-        unset($_SESSION['join_data'][$i+3]);
-        $_SESSION['join_data']=array_values($_SESSION['join_data']);
-        ?>
-        save_context_join.splice(<?=$i?>,1);
-        save_context_join.splice(<?=$i+1?>,1);
-        save_context_join.splice(<?=$i+2?>,1);
-        save_context_join.splice(<?=$i+3?>,1);
+
+      if(val=='<?=$_SESSION['join_data'][$i]?>'&&val2=='<?=$_SESSION['join_data'][$i+1]?>'){
+        save_context_join.splice(<?=$i?>,4);
+        // console.log(save_context_join);
       }
       <?php
     }
@@ -435,6 +452,7 @@ function trip_data_display(val,val1){
       <?php
     }
   }
+
   ?>
   for(var i=0;i < receive_trip_data_length;i++){
     if(sort_trip_data[i][0]==val){
@@ -444,9 +462,10 @@ function trip_data_display(val,val1){
         if(str[1]==null){
           str[1] = "0";
         }
-        $('#trip_date_data').append($('<div id="days_'+str[0]+'"></div>').html(sort_trip_data[i][1]));
+        $('#trip_date_data').append($('<div class="days_date" id="days_'+str[0]+'"></div>').html(sort_trip_data[i][1]));
         add_val[str[0]] = add;
         $('#days_'+str[0]).append($('<input id=trip_plan_add type="button" value="追加" onclick="trip_day_plan_add('+str[0]+',0)">'));
+        $('#days_'+str[0]).append($('<input id=trip_plan_delete type="button" value="削除" onclick="trip_day_plan_delete('+str[0]+',0)">'));
         $('#days_'+str[0]).append($('<div id="trip_day_plan'+str[0]+str[1]+'"></div>'));
         var time_context = "'"+sort_trip_data[i][3]+"'";
         var context = "'"+sort_trip_data[i][4]+"'";
@@ -478,6 +497,7 @@ function trip_data_display(val,val1){
       }
     });
   }
+   $('.trip_plan_decide').hide();
 };
 
 function trip_data_decide(val,val1){
@@ -514,7 +534,6 @@ function trip_data_decide(val,val1){
     var output = $('#output').html($("#trip_title").val());
     var date_diff = 0;
     date_diff = '<?=@$_SESSION['date_diff']?>';
-    console.log(date_diff);
     for(var i=0;i <= date_diff;i++){
       $('#days_'+i).remove();
     }
@@ -523,9 +542,10 @@ function trip_data_decide(val,val1){
   for(var i=0;i <= date_diff;i++){
     var get_month = start_date_1.getMonth()+1;
     var date = start_date_1.getFullYear() + "-" +  get_month +"-"+ start_date_1.getDate();
-    $('#trip_date_data').append($('<div id="days_'+i+'"></div>').html(date));
+    $('#trip_date_data').append($('<div class="days_date" id="days_'+i+'"></div>').html(date));
     add_val[i] = 0;
     $('#days_'+i).append($('<input id=trip_plan_add type="button" value="追加" onclick="trip_day_plan_add('+i+',0)">'));
+    $('#days_'+i).append($('<input id=trip_plan_delete type="button" value="削除" onclick="trip_day_plan_delete('+i+',0)">'));
     $('#days_'+i).append($('<div id="trip_day_plan'+i+0+'"></div>').html('<div id="trip_day_plan'+i+0+'"></div>').html('<input class="toMin" id="toMin'+i+0+'" type="time" size="2" maxlength="2"><input class="in_trip_day_plan" id="in_trip_day_plan'+i+0+'" type="text" placeholder="予定記入"> <input id=trip_plan type="button" value="登録" onclick="trip_plan_join('+i+',0,0)">'));
     start_date_1.setDate(start_date_1.getDate()+1);
   }
@@ -545,8 +565,8 @@ function trip_data_decide(val,val1){
         date_diff:date_diff
       }
     });
-    console.log(new Date($("#start_date").val()));
   }
+    $('.trip_plan_decide').hide();
 };
 
 var vote = {};
@@ -569,6 +589,7 @@ $(function(){
     for($i=0;$i < count($_SESSION['ses']);$i++){
       ?>
       $('#<?=$_SESSION['ses'][$i][0]?>').css({'position':'absolute','top':<?=$_SESSION['ses'][$i][3]?>,'left':<?=$_SESSION['ses'][$i][4]?>});
+      save_popthing.push(['<?=$_SESSION['ses'][$i][0]?>','<?=$_SESSION['ses'][$i][1]?>','<?=$_SESSION['ses'][$i][2]?>','<?=$_SESSION['ses'][$i][3]?>','<?=$_SESSION['ses'][$i][4]?>']);
       <?php
     }
   }
@@ -642,13 +663,35 @@ function pop_data_vote(val,val2,val3){
   }
 }
 
+window.onbeforeunload = function () {
+    $.ajax({
+      type: "POST",
+      url: "pop_thing_data.php",
+      async: false,
+      data: {
+        ses:save_popthing,
+        join_data:save_context_join
+      },
+      success: function(data, dataType){
+              //   //デバッグ用 アラートとコンソール
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown){
+        alert('Error : ' + errorThrown);
+        $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+        $("#textStatus").html("textStatus : " + textStatus);
+        $("#errorThrown").html("errorThrown : " + errorThrown);
+      }
+    });
+    return true;
+}
+
 </script>
 <div id="bms_chat_header">
   <div id="bms_chat_user_status">
-    <div id="bms_status_icon">●</div>
+    <div id="bms_status_icon">🛫</div>
     <div id ="bms_chat_user_name">
       <?php
-      echo $name.'さん';
+      echo $group_name.'　　　';
       ?>
       <a href="logout.php">ログアウト</a>
       <a href="choice.php">グループ切り替え</a>
@@ -658,39 +701,48 @@ function pop_data_vote(val,val2,val3){
     </div>
   </div>
 </div>
-<body>
+<body id=display>
   <div id=plan_css>
     <div class="split">
       <div class="split-item pop_display">
         <div class="selectable">
           <?php
           for($i=0;$i<$favo_things;$i++){
-            echo '<div class="pop_things" id="pop_thing_'.$favo[$i][1].'">'.$favo[$i][0].'<input type=button id="pop_voting" value= "-" onclick="pop_data_vote('.$i.',0,0)"><div id="pop_voting_'.$favo[$i][1].'">'.$favo[$i][2].'</div><input type=button id="pop_voting" value= "+" onclick="pop_data_vote('.$i.',1,0)"></div>';
+            echo '<div class="pop_things" id="pop_thing_'.$favo[$i][1].'">'.$favo[$i][0].'</br><input type=button id="pop_voting" value= "+" onclick="pop_data_vote('.$i.',1,0)"><div id="pop_voting_'.$favo[$i][1].'">'.$favo[$i][2].'</div><input type=button id="pop_voting" value= "-" onclick="pop_data_vote('.$i.',0,0)"></div>';
           }
           ?>
         </div>
       </div>
     </div>
     <div class="split-item trip_plan">
+      <div class="trip_plan_decide">
+      </br>  </br>
+      <p id=save_plan_t>保存されているプラン</p>
       <?php
       if(count($title_0) > 0){
         for($i=0;$i<count($title_0);$i++){
           $title = '"'.$title_0[$i].'"';
           ?>
-          <div><input id=trip_data type="button" onclick='trip_data_display(<?= $title?>,0)' value=<?= $title?>></div>
+          <div><input class=trip_data_d type="button" onclick='trip_data_display(<?= $title?>,0)' value=<?= $title?>></div>
 
           <?php
         }
       }
       ?>
+    </br>
+  </br>
       <form id="trip_data" action="trip_planning.php" method="post">
-        <div><input id="start_date" name="start_date" type="date"></div><p>~</p><div><input id="finish_date" name="finish_date" type="date"></div>
-        <div><input id="trip_title" name="trip_title" type="text" placeholder="タイトル"></div>
-        <div><input id=trip_main_data type="button" value="送信" onclick="trip_data_decide(0,0)"></div>
+        <div><input class="text" id="start_date" name="start_date" type="date"></div><p>~</p><div><input class="text" id="finish_date" name="finish_date" type="date"></div>
+        <div><input class="text" id="trip_title" name="trip_title" type="text" placeholder="タイトル"></div>
+        <input type="hidden" id="trip" name="trip" value="1">
+        <div><input class="plan_sub" id=trip_main_data type="button" value="送信" onclick="trip_data_decide(0,0)"></div>
       </form>
-      <div>旅行タイトル：<span id="output"></span></div>
+    </div>
+    <div id=trip_plan_sub>
+      <div id=trip_title_output><span id="output"></span><input id=trip_plans type="button" value="保存" onclick="trip_plan_save()"></div>
+    </br>
       <div id="trip_date_data"></div>
-      <div><input id=trip_plans type="button" value="保存" onclick="trip_plan_save()"></div>
+    </div>
     </div>
   </div>
   <div id="pointer"></div>

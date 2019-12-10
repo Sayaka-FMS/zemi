@@ -1,12 +1,15 @@
+#display{
+  background-color: #eee;
+}
 .pop_things {
-  width :100px;
+  width :120px;
   position:relative;
   display: inline-block;
   padding: 1% 0.1%;
-  margin: 2em 1em;
-  color: #232323;
-  background: #fff8e8;
-  border-left: solid 10px #ffc06e;
+  margin: 3.5em 1em;
+  color: #fff;
+  background: #9FB0C5;
+  border-left: solid 10px #387688;
   text-align: center;/*文字をボタン中央に表示*/
 }
 #pointer {
@@ -32,6 +35,143 @@
   overflow-y: scroll;
   overflow-x: scroll;
 }
-/* #things {
-display: inline-block;
-} */
+#pop_voting{
+  position: relative;
+  border:0;
+  border-radius: 10px;
+  padding:2px 5px;
+  background-color: #387688;
+  font-size: 20px;
+  font-family: Modern;
+  font-weight: bold;
+  color: white;
+}
+#trip_data{
+  width:70%;
+  text-align: center;
+  padding: 0.5em 1em;
+  margin: auto;
+  font-weight: bold;
+  color: #6091d3;/*文字色*/
+  background: inherit;
+  border: solid 3px #387688;/*線*/
+  border-radius: 10px;/*角の丸み*/
+}
+.text{
+  font: 15px/24px sans-serif;
+  box-sizing: border-box;
+  width: 70%;
+  margin: 8px 0;
+  padding: 0.3em;
+  transition: 0.3s;
+  border: 1px solid white;
+  border-radius: 4px;
+  outline: none;
+}
+.trip_data_d{
+  margin-right:5px;
+  float:left;
+  text-align: center;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  color: #387688;/*文字色*/
+  background: inherit;
+  border: solid 3px #387688;/*線*/
+  border-radius: 10px;/*角の丸み*/
+}
+.trip_data_d:hover{
+  background: #fff;
+}
+#save_plan_t{
+  color: #387688;/*文字色*/
+  font-size: 15px;
+  font-weight: bold;
+}
+#trip_main_data{
+  width: 50%;
+  position: relative;
+  border: solid 3px #fff;/*線*/
+  border-radius: 10px;
+  padding:2px 5px;
+  background-color: #387688;
+  font-size: 20px;
+  font-family: Modern;
+  font-weight: bold;
+  color: white;
+}
+#trip_main_data:hover{
+  background-color: #fff;
+  color: #387688;
+  border: solid 3px #387688;/*線*/
+}
+#trip_plan_sub{
+  text-align: left;
+  margin-top:70px;
+  margin-left: 10px;
+}
+#trip_plan_add,#trip_plan_delete,#trip_plan{
+  margin-right:5px;
+  text-align: center;
+  margin-left: 10px;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  color: #387688;/*文字色*/
+  background: inherit;
+  border: solid 3px #387688;/*線*/
+  border-radius: 10px;/*角の丸み*/
+}
+#trip_plan_add:hover,#trip_plan_delete:hover,#trip_plan:hover{
+  background-color: #fff;
+}
+#output{
+  color:#387688;
+  font-weight: bold;
+  margin-bottom: 100px;
+  font-size:20px;
+  border-bottom: dotted 3px #387688;
+}
+#trip_date_data{
+  text-decoration: underline;
+  font-size: 20px;
+}
+
+.toMin{
+  display: block;
+  font: 15px/24px sans-serif;
+  box-sizing: border-box;
+  width: 20%;
+  margin: 8px 0;
+  padding: 0.3em;
+  border: 1px solid white;
+  border-radius: 4px;
+  outline: none;
+}
+.in_trip_day_plan{
+  width:80%;
+  font: 15px/24px sans-serif;
+  box-sizing: border-box;
+  margin: 8px 0;
+  padding: 0.3em;
+  border: 1px solid white;
+  border-radius: 4px;
+  outline: none;
+}
+
+.days_date{
+  margin-top:10px;
+  color:#387688;
+}
+
+#trip_plans{
+  width: 20%;
+  position: relative;
+  border: solid 3px #fff;/*線*/
+  border-radius: 10px;
+  padding:2px 5px;
+  margin-left: 10px;
+  background-color: #387688;
+  font-size: 20px;
+  font-family: Modern;
+  font-weight: bold;
+  color: white;
+}
