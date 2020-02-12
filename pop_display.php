@@ -33,9 +33,10 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
 <script>
 
-var conn = new WebSocket('ws://localhost:8080');
+var conn = new WebSocket('ws://192.168.11.22:8080');
 var multi_login_count = 0;
 var save_popthing = [];
+var save_userID = [];
 
 $(function(){
   conn.onmessage = function(e) {
@@ -47,9 +48,19 @@ $(function(){
         save_popthing.push([receive_data["mes"],receive_data["top"],receive_data["left"],receive_data["offset_top"],receive_data["offset_left"]]);
       }
     };
+    if(receive_data["message"]!=null){
+      alert(receive_data["name"] +"が" + receive_data["message"]+"と送信しました");
+    };
     if(receive_data["mouseX"]!=null){
-      $("#pointer").css({'background-color':"red",'top':receive_data["mouseY"],'left':receive_data["mouseX"]});
-      document.getElementById("pointer").innerText = receive_data["userID"];
+      var result = save_userID.some( function( value ) {
+        return value === receive_data["userID"];
+      });
+      if(result===false){
+        var a=$('#display').append($('<div class="pointer" id="pointer'+receive_data["userID"]+'"></div>').html(receive_data["userID"]));
+        save_userID.push(receive_data["userID"]);
+      }
+      $("#pointer"+receive_data["userID"]).css({'top':receive_data["mouseY"],'left':receive_data["mouseX"]});
+      // document.getElementById("pointer"+receive_data["userID"]).innerText = receive_data["userID"];
     }
     if(receive_data["pop_vote_id"]!=null){
       pop_data_vote(receive_data["pop_vote_id"],receive_data["pop_vote_add"],1);
@@ -183,6 +194,7 @@ try {
   echo $e->getMessage() . PHP_EOL;
 }
 ?>
+
 var vote = {};
 var favo = {};
 var favo_length = 0;
@@ -248,33 +260,33 @@ function pop_data_vote(val,val2,val3){
 
 window.onbeforeunload = function () {
   console.log(save_popthing);
-    $.ajax({
-      type: "POST",
-      url: "pop_thing_data.php",
-      async: false,
-      data: {
-        ses:save_popthing
-      },
-      success: function(data, dataType){
-              //   //デバッグ用 アラートとコンソール
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown){
-        alert('Error : ' + errorThrown);
-        $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
-        $("#textStatus").html("textStatus : " + textStatus);
-        $("#errorThrown").html("errorThrown : " + errorThrown);
-      }
-    });
-    return true;
+  $.ajax({
+    type: "POST",
+    url: "pop_thing_data.php",
+    async: false,
+    data: {
+      ses:save_popthing
+    },
+    success: function(data, dataType){
+      //   //デバッグ用 アラートとコンソール
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown){
+      alert('Error : ' + errorThrown);
+      $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+      $("#textStatus").html("textStatus : " + textStatus);
+      $("#errorThrown").html("errorThrown : " + errorThrown);
+    }
+  });
+  return true;
 }
 
 </script>
 <div id="bms_chat_header">
   <div id="bms_chat_user_status">
-    <div id="bms_status_icon">●</div>
+    <div id="bms_status_icon">🛫</div>
     <div id ="bms_chat_user_name">
       <?php
-      echo $name.'さん';
+      echo $group_name.'　　　';
       ?>
       <a href="logout.php">ログアウト</a>
       <a href="choice.php">グループ切り替え</a>
@@ -284,15 +296,15 @@ window.onbeforeunload = function () {
     </div>
   </div>
 </div>
-<body>
+<body id="display">
   <div class="selectable">
     <?php
     for($i=0;$i<$favo_things;$i++){
-      echo '<div class="pop_things" id="pop_thing_'.$favo[$i][1].'">'.$favo[$i][0].'<input type=button id="pop_voting" value= "-" onclick="pop_data_vote('.$i.',0,0)"><div id="pop_voting_'.$favo[$i][1].'">'.$favo[$i][2].'</div><input type=button id="pop_voting" value= "+" onclick="pop_data_vote('.$i.',1,0)"></div>';
+      echo '<div class="pop_things" id="pop_thing_'.$favo[$i][1].'">'.$favo[$i][0].'</br><input type=button id="pop_voting" value= "+" onclick="pop_data_vote('.$i.',1,0)"><div id="pop_voting_'.$favo[$i][1].'">'.$favo[$i][2].'</div><input type=button id="pop_voting" value= "-" onclick="pop_data_vote('.$i.',0,0)"></div>';
     }
     ?>
   </div>
-  <div id="pointer"></div>
+  <!-- <div id="pointer"></div> -->
 </body>
 </html>
 

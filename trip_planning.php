@@ -32,11 +32,12 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 <script src="http://code.jquery.com/jquery-3.4.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
 <script>
-var conn = new WebSocket('ws://localhost:8080');
+var conn = new WebSocket('ws://192.168.11.22:8080');
 var multi_login_count = 0;
 var save_popthing = [];
 var save_context_join = [];
 var add_val = [];
+var save_userID = [];
 $(function(){
   conn.onmessage = function(e) {
     receive_data = JSON.parse(e.data);
@@ -45,10 +46,19 @@ $(function(){
       if(receive_data["drag"] !=1){
         save_popthing.push([receive_data["mes"],receive_data["top"],receive_data["left"],receive_data["offset_top"],receive_data["offset_left"]]);
       }
+    }
+    if(receive_data["message"]!=null){
+      alert(receive_data["name"] +"が" + receive_data["message"]+"と送信しました");
     };
     if(receive_data["mouseX"]!=null){
-      $("#pointer").css({'background-color':"red",'top':receive_data["mouseY"],'left':receive_data["mouseX"]});
-      document.getElementById("pointer").innerText = receive_data["userID"];
+      var result = save_userID.some( function( value ) {
+        return value === receive_data["userID"];
+      });
+      if(result===false){
+        var a=$('#display').append($('<div class="pointer" id="pointer'+receive_data["userID"]+'"></div>').html(receive_data["userID"]));
+        save_userID.push(receive_data["userID"]);
+      }
+      $("#pointer"+receive_data["userID"]).css({'top':receive_data["mouseY"],'left':receive_data["mouseX"]});
     };
     if(receive_data['start_date']!=null){
       $("#start_date").val(receive_data['start_date']);
@@ -175,7 +185,6 @@ $(function(){
       var context = '<?=@$_SESSION['join_data'][$i+3]?>';
       var context_1 = "'<?=@$_SESSION['join_data'][$i+3]?>'";
       save_context_join.push(val,val2,time_context,context);
-      console.log(save_context_join);
       $("#trip_day_plan"+val+val2).html(time_context+"　"+context+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+val+','+val2+',0,'+time_context_1+','+context_1+')">');
       $.ajax({
         type: "POST",
@@ -188,6 +197,7 @@ $(function(){
     }
   }
   ?>
+  console.log(save_context_join);
 });
 function trip_plan_save(){
   var save_context=[];
@@ -391,7 +401,7 @@ function trip_plan_join(val,val2,val3){
   };
   $("#trip_day_plan"+val+val2).html(time_context+" "+context+'<input id=trip_plan type="button" value="変更" onclick="trip_plan_change('+val+','+val2+',0,'+time_context_1+','+context_1+')">');
    save_context_join.push(val,val2,time_context,context);
-   console.log(save_context_join);
+    console.log(save_context_join);
    $.ajax({
      type: "POST",
      url: "trip_planning_data.php",
@@ -416,8 +426,15 @@ function trip_plan_change(val,val2,val3,val4,val5){
       ?>
 
       if(val=='<?=$_SESSION['join_data'][$i]?>'&&val2=='<?=$_SESSION['join_data'][$i+1]?>'){
+        <?php
+         unset($_SESSION['join_data'][$i]);
+         unset($_SESSION['join_data'][$i+1]);
+         unset($_SESSION['join_data'][$i+2]);
+         unset($_SESSION['join_data'][$i+3]);
+         $_SESSION['join_data']=array_values($_SESSION['join_data']);
+        ?>
         save_context_join.splice(<?=$i?>,4);
-        // console.log(save_context_join);
+        console.log(save_context_join);
       }
       <?php
     }
@@ -432,6 +449,23 @@ function trip_plan_change(val,val2,val3,val4,val5){
     //param['trip_title']=val;
     conn.send(JSON.stringify(param));
   }
+  $.ajax({
+    type: "POST",
+    url: "trip_planning_data.php",
+    async: false,
+    data: {
+      join_data:save_context_join,
+    },
+    success: function(data, dataType){
+      //  デバッグ用 アラートとコンソール
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown){
+      alert('Error : ' + errorThrown);
+      $("#XMLHttpRequest").html("XMLHttpRequest : " + XMLHttpRequest.status);
+      $("#textStatus").html("textStatus : " + textStatus);
+      $("#errorThrown").html("errorThrown : " + errorThrown);
+    }
+  });
 };
 
 function trip_data_display(val,val1){
@@ -670,7 +704,6 @@ window.onbeforeunload = function () {
       async: false,
       data: {
         ses:save_popthing,
-        join_data:save_context_join
       },
       success: function(data, dataType){
               //   //デバッグ用 アラートとコンソール
@@ -745,7 +778,6 @@ window.onbeforeunload = function () {
     </div>
     </div>
   </div>
-  <div id="pointer"></div>
 </body>
 </html>
 

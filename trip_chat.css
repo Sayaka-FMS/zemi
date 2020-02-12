@@ -51,7 +51,7 @@
   position:absolute;
   width : 100%;
   top: 7.5%;
-  height: 84%;/*テキストエリアが下に張り付く様にする*/
+  height: 76%;/*テキストエリアが下に張り付く様にする*/
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
   background-color: #eee;
@@ -70,8 +70,8 @@
   padding: 5px;
   text-align: center;
   color: #fff;/*テキストを白にする*/
-  background: #13178E;
-  border: 2px solid #fff;
+  background: #387688;
+  border: 2px solid #9FB0C5;
   border-radius: 30px 30px 0px 30px;/*右下だけ尖らせて吹き出し感を出す*/
   margin-right: 10px;/*右側の発言だとわかる様に、吹き出し左側に隙間を入れる*/
 }
@@ -94,7 +94,7 @@
   text-align: right;
   font-size: 20px;
   font-weight: bold;
-  color:#13178E;
+  color:#387688;
 }
 /* 相手 */
 #bms_messege_p_left{
@@ -104,9 +104,9 @@
   margin-bottom:  10px;
   padding: 5px;
   text-align: center;
-  color: #13178E;/*テキストを白にする*/
-  background: #fff;
-  border: 2px solid #13178E;
+  color: #fff;/*テキストを白にする*/
+  background: #9FB0C5;
+  border: 2px solid #387688;
   border-radius: 30px 30px 30px 0px;/*右下だけ尖らせて吹き出し感を出す*/
   margin-left: 10px;/*右側の発言だとわかる様に、吹き出し左側に隙間を入れる*/
 }
@@ -128,7 +128,7 @@
   text-align: left;
   font-size: 20px;
   font-weight: bold;
-  color:#13178E;
+  color:#387688;
 }
   /* テキストエリア、送信ボタン④ */
   #bms_send {
@@ -138,7 +138,7 @@
     border-right: 1px solid #ddd;
     border-left: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
-    height: 48px;
+    height: 100px;
     width: 100%;
     padding-bottom: 10px;
     z-index: 2;
@@ -148,6 +148,8 @@
     top:5px;
     /* width: calc(100% - 100px);　 */
     width: 80%;
+    height: 80%;
+    font-size:20px;
     line-height: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;/*角丸*/
@@ -157,7 +159,8 @@
     display: block;
     margin-left: 85%;
     width: 10%;
-    font-size: 16px;
+    height: 50%;
+    font-size: 20px;
     color: #fff;
     font-weight: bold;
     background: #bcbcbc;
@@ -171,7 +174,8 @@
     margin-left: 85%;
     margin-bottom: 3px;
     width: 10%;
-    font-size: 8px;
+    height: 50%;
+    font-size: 15px;
     line-height: 3em;
     color: #fff;
     font-weight: bold;

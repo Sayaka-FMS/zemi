@@ -39,12 +39,12 @@ $pdo->setAttribute( PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC );
 <script src="http://code.jquery.com/jquery-2.2.4.js"></script>
 <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
 <script>
-var conn = new WebSocket('ws://localhost:8080');
+var conn = new WebSocket('ws://192.168.11.22:8080');
 var multi_login_count = 0;
 //接続できた
 conn.onopen = function(e) {
   console.log(e);
-  $("#bms_messages").animate({scrollTop:10000});
+  $("#bms_messages").animate({scrollTop:20000});
 };
 conn.onerror = function(e) {
   alert("エラー");
@@ -55,21 +55,22 @@ conn.onclose = function(e) {
 };
 //メッセージを受け取った
 conn.onmessage = function(e) {
-  console.log(e.data);
   var receive_data = {}
   receive_data = JSON.parse(e.data);
   append_message = receive_data["name"] +":" + receive_data["message"];
   console.log(receive_data["favo"]);
   if(receive_data["message"]!=null){
   if(receive_data["favo"]==1){
-    var inner = $('<div id="bms_messege_p_left_favo"></div>').text(append_message);
+    var inner_name = $('<div id="bms_messege_p_left_name"></div>').text(receive_data["name"]);
+    var inner_mes = $('<div id="bms_messege_p_left_favo"></div>').text(receive_data["message"]);
   }else{
-    var inner = $('<div id="bms_messege_p_left"></div>').text(append_message);
+    var inner_name = $('<div id="bms_messege_p_left_name"></div>').text(receive_data["name"]);
+    var inner_mes = $('<div id="bms_messege_p_left"></div>').text(receive_data["message"]);
   }
  }
  if(receive_data["message"]!=null){
    append_message = receive_data["name"] +":" + receive_data["message"];
-   alert(append_message+"  "+"と送信しました");
+   // alert(append_message+"  "+"と送信しました");
  }
  if(receive_data["save"]!=null){
    alert(receive_data["name"]+"がポップデータを保存しました");
@@ -77,9 +78,11 @@ conn.onmessage = function(e) {
  if(receive_data["save_plan"]!=null){
    alert(receive_data["name"]+"が旅行プランを保存しました");
  }
-  var box = $('<div id="box"></div>').html(inner);
+  var box = $('<div id="box"></div>').html(inner_name);
   $('#chat').append(box);
-  $("#bms_messages").animate({scrollTop:10000});
+  var box = $('<div id="box"></div>').html(inner_mes);
+  $('#chat').append(box);
+  $("#bms_messages").animate({scrollTop:20000});
 };
 //メッセージを送る
 function send(favo) {
@@ -91,19 +94,13 @@ function send(favo) {
 //  var reset_favo = document.getElementById("favo_btn");
   //reset_favo.value = "0";
   if(param["favo"]==1){
-    $('#chat').append('<div id="bms_messege_p_right_favo">'+param["name"]+" "+param['message']+'</div>');
+    $('#chat').append('<div id="bms_messege_p_right_name">'+param["name"]+'</div><div id="bms_messege_p_right_favo">'+param['message']+'</div>');
   }else{
-    $('#chat').append('<div id="bms_messege_p_right">'+param["name"]+" "+param['message']+'</div>');
+    $('#chat').append('<div id="bms_messege_p_right_name">'+param["name"]+'</div><div id="bms_messege_p_right">'+param['message']+'</div>');
   }
   conn.send(JSON.stringify(param));
   console.log(JSON.stringify(param));
-  $("#bms_messages").animate({scrollTop:10000});
-  //console.log($('#favo_btn').val());
-  //チャット欄にメッセージ追加
-  //Ajax通信メソッド
-  //type : HTTP通信の種類(POSTとかGETとか)
-  //url  : リクエスト送信先のURL
-  //data : サーバに送信する値
+  $("#bms_messages").animate({scrollTop:20000});
   $.ajax({
     type: "POST",
     url: "trip_data.php",
@@ -145,10 +142,10 @@ function send_favo() {
   <div id="bms_messages_container">
     <div id="bms_chat_header">
       <div id="bms_chat_user_status">
-        <div id="bms_status_icon">●</div>
+        <div id="bms_status_icon">🛫</div>
         <div id ="bms_chat_user_name">
           <?php
-          echo $name.'さん';
+          echo $group_name.'　　　';
           ?>
           <a href="logout.php">ログアウト</a>
           <a href="choice.php">グループ切り替え</a>
@@ -166,15 +163,15 @@ function send_favo() {
           foreach ( $stmt as $value ) {
             if($value['name']==$_SESSION['username']){
               if($value['favo']==1){
-                echo  "<div id='bms_messege_p_right_favo'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
+                echo  "<div id='bms_messege_p_right_name'>".$value[ 'name' ] ."</div><div id='bms_messege_p_right_favo'>". $value[ 'message' ] ."</div>";
               }else{
-                echo  "<div id='bms_messege_p_right'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
+                echo  "<div id='bms_messege_p_right_name'>".$value[ 'name' ] ."</div><div id='bms_messege_p_right'>". $value[ 'message' ] ."</div>";
               }
             }else
             if($value['favo']==1){
-              echo  "<div id='bms_messege_p_left_favo'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
+              echo  "<div id='bms_messege_p_left_name'>".$value[ 'name' ] ."</div><div id='bms_messege_p_left_favo'>" . $value[ 'message' ] ."</div>";
             }else{
-              echo  "<div id='bms_messege_p_left'>" .$value[ 'name' ] ." ". $value[ 'message' ] ."</div>";
+              echo  "<div id='bms_messege_p_left_name'>".$value[ 'name' ] ."</div><div id='bms_messege_p_left'>" . $value[ 'message' ] ."</div>";
             }
           }
       } catch ( Exception $e ) {

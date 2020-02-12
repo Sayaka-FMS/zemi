@@ -2,7 +2,7 @@
   background-color: #eee;
 }
 .pop_things {
-  width :120px;
+  width :180px;
   position:relative;
   display: inline-block;
   padding: 1% 0.1%;
@@ -11,9 +11,17 @@
   background: #9FB0C5;
   border-left: solid 10px #387688;
   text-align: center;/*文字をボタン中央に表示*/
+  word-break: break-all;
+
 }
-#pointer {
+.pointer {
   position:absolute;
+  text-align: center;
+  width:50px;
+  padding:3px 7px;
+  background-color:#71727e;
+  color:#fff;
+  border-radius: 10px;
 }
 .split{
   /* display: table; */
